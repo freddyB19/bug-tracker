@@ -1,11 +1,11 @@
 from typing import List
 from typing import Dict
-from typing import Literal
 from typing import Optional
 
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
+from sqlalchemy.orm import joinedload
 
 from pydantic import validate_call
 
@@ -84,10 +84,17 @@ def command_create_ticket(ticket: schemas.TicketRequest) -> Ticket:
 def command_get_ticket(ticket_id: int) -> Ticket:
 	db = next(get_db())
 
-	ticket = db.get(Ticket, ticket_id)
-
-	if ticket is None:
+	if db.query(Ticket).filter(Ticket.id == ticket_id).one_or_none() is None:
 		raise ValueError("No existe información sobre este ticket")
+
+	sql = (
+		select(Ticket)
+		.options(joinedload(Ticket.project))
+		.where(Ticket.id == ticket_id)
+	)
+
+
+	ticket = db.scalar(sql)
 
 	return ticket
 
