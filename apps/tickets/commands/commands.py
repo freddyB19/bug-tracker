@@ -260,9 +260,15 @@ def command_get_tickets_history(ticket_id: int, page: int, pageSize: int) -> Opt
 def command_get_detail_ticket_history(history_id: int) -> TicketHistory:
 	db = next(get_db())
 
-	history = db.get(TicketHistory, history_id)
-
-	if history is None:
+	if db.query(TicketHistory).filter(TicketHistory.id == history_id).one_or_none() is None:
 		raise ValueError("No existe información sobre este historial.")
+
+	sql = (
+		select(TicketHistory)
+		.options(joinedload(TicketHistory.ticket))
+		.where(TicketHistory.id == history_id)
+	)
+
+	history = db.scalar(sql)
 
 	return history
