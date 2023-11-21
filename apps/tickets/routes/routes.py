@@ -242,7 +242,7 @@ def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagi
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.TicketsHistoryByTicketResponse
 )
-def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.ListPagination, Query()]) -> schemas.TicketsHistoryByTicketResponse:
+def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.ListPagination, Query()], token: str = Depends(validate_authorization)) -> schemas.TicketsHistoryByTicketResponse:
 	try:
 		ticket = commands.command_get_ticket(
 			ticket_id = id
@@ -292,7 +292,7 @@ def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.TicketsHistoryResponse
 )
-def get_detail_ticket_history(id: int) -> schemas.TicketsHistoryResponse:
+def get_detail_ticket_history(id: int, token: str = Depends(validate_authorization)) -> schemas.TicketsHistoryResponse:
 	try:
 		history = commands.command_get_detail_ticket_history(
 			history_id = id
