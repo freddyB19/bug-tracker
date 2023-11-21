@@ -96,6 +96,7 @@ class TicketSchema(BaseModel):
 
 class TicketRequest(TicketSchema):
 	project_id: int
+	title: LenValidationField
 	state: Optional[StateField] = ChoicesState.nuevo.name
 	priority: Optional[PriorityField] = ChoicesPrority.normal.name
 	type: Optional[TypeField] = ChoicesType.abierto.name
