@@ -141,7 +141,7 @@ def delete_ticket(id: int, token: str = Depends(validate_authorization)) -> None
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.TicketsByProjectResponse
 )
-def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagination, Query()]) -> schemas.TicketsByProjectResponse:
+def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagination, Query()], token: str = Depends(validate_authorization)) -> schemas.TicketsByProjectResponse:
 
 	try:
 		project = c_projects.command_get_project(
