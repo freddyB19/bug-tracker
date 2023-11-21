@@ -152,6 +152,9 @@ def command_get_ticket_by_title(ticket: schemas.TicketByTitle) -> Optional[List[
 def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> Ticket:
 	db = next(get_db())
 
+	if db.query(Ticket).filter(Ticket.id == ticket_id).one_or_none() is None:
+		raise ValueError("No existe información sobre este ticket")
+
 	if infoUpdate.type is not None and not utils.validate_choice(choice = infoUpdate.type, options = ChoicesType):
 		raise ValueError("El tipo elegido es el incorrecto")
 	if infoUpdate.state is not None and not utils.validate_choice(choice = infoUpdate.state, options = ChoicesState):
@@ -170,9 +173,6 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 
 	ticket = db.execute(sql).scalar_one_or_none()
 
-	if ticket is None:
-		raise ValueError("No existe información sobre este ticket")
-	
 	db.commit()
 	db.refresh(ticket)
 	db.close()
