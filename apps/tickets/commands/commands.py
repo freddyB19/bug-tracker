@@ -247,3 +247,15 @@ def command_get_tickets_history(ticket_id: int, page: int, pageSize: int) -> Opt
 	histories = db.scalars(sql).all()
 
 	return histories
+
+
+@validate_call
+def command_get_detail_ticket_history(history_id: int) -> TicketHistory:
+	db = next(get_db())
+
+	history = db.get(TicketHistory, history_id)
+
+	if history is None:
+		raise ValueError("No existe información sobre este historial.")
+
+	return history
