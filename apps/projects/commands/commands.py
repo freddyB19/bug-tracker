@@ -3,6 +3,8 @@ from typing import List
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
+from sqlalchemy.orm import joinedload
+
 
 from pydantic import validate_call
 
@@ -44,16 +46,19 @@ def command_create_project(project: schemas.ProjectRequest) -> Project:
 def command_get_project(project_id: int) -> Project:
 	db = next(get_db())
 
+	if db.query(Project).filter(Project.id == project_id).one_or_none() is None:
+		raise ValueError(f"No existe información sobre el proyecto.")
+
 	sql = (
 		select(Project)
-		.join(User)
+		.options(joinedload(Project.user))
 		.where(Project.id == project_id)
 	)
 
 	project = db.scalar(sql)
 
-	if project is None:
-		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
+	# if project is None:
+	# 	raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
 
 	return project
 
