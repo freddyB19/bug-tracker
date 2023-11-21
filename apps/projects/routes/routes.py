@@ -1,9 +1,11 @@
 from typing import List
+from typing_extensions import Annotated
 
 from fastapi import status
 from fastapi import Depends
 from fastapi import Request
 from fastapi import APIRouter
+from fastapi import Query
 
 
 from fastapi.responses import JSONResponse
@@ -95,24 +97,24 @@ def delete_project(id: int, project: schemas.ProjectDelete, token: str = Depends
 @router.get(
 	"/list/user",
 	status_code = status.HTTP_200_OK,
-	response_model = schemas.ProjectsPagination
+	response_model = schemas.ProjectsByUser
 )
-def get_project_by_user(request: Request, user_id: int, page: int = 0, pageSize: int = 10,token: str = Depends(validate_authorization)) -> schemas.ProjectsPagination:
+def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagination, Query()],token: str = Depends(validate_authorization)) -> schemas.ProjectsByUser:
 
 	try:
 		
 		user = c_users.command_get_user(
-			user_id = user_id
+			user_id = query.user_id
 		)
 		
 		total = commands.command_get_total_project_user(
-			user_id = user_id
+			user_id = query.user_id
 		)
 
 		projects = commands.command_get_projects_user(
-			page = page,
-			pageSize = pageSize,
-			user_id = user_id
+			page = query.page,
+			pageSize = query.pageSize,
+			user_id = query.user_id
 		)
 	
 	except ValueError as e:
@@ -126,16 +128,16 @@ def get_project_by_user(request: Request, user_id: int, page: int = 0, pageSize:
 		request = request,
 		elements = projects,
 		total_elements = total,
-		page = page,
-		pageSize = pageSize,
+		page = query.page,
+		pageSize = query.pageSize,
 		params = {
-			"user_id": user_id
+			"user_id": query.user_id
 		}
 	)
 
 	response = {
 		"previous": pagination.get('previous'),
-		"current": page,
+		"current": query.page,
 		"next": pagination.get('next'),
 		"user": user,
 		"content": {
