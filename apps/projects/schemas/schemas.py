@@ -10,9 +10,10 @@ from pydantic import AfterValidator
 from pydantic import PlainValidator
 from pydantic import field_validator
 
-
 from apps.projects.models import ChoicesPrority
 from apps.users.schemas.schemas import UserResponse
+from apps.utils.pagination import pagination as pg
+
 
 MAX_LENGTH_TITLE = 30
 MIN_LENGTH_TITLE = 5 
@@ -92,9 +93,6 @@ class ListProjects(BaseModel):
 	projects: Optional[List[ProjectSimpleResponse]]
 
 
-class ProjectsPagination(BaseModel):
-	previous: str | None
-	next: str | None
-	current: int
+class ProjectsPagination(pg.ResponsePagination):
 	user: UserResponse
 	content: ListProjects
