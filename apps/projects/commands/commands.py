@@ -5,7 +5,6 @@ from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.orm import joinedload
 
-
 from pydantic import validate_call
 
 from apps import get_db
@@ -56,9 +55,6 @@ def command_get_project(project_id: int) -> Project:
 	)
 
 	project = db.scalar(sql)
-
-	# if project is None:
-	# 	raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
 
 	return project
 
