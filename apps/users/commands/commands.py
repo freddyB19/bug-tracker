@@ -119,6 +119,28 @@ def command_update_email_user(id, userInfo, db:List[Dict] | None = None) -> bool
 
 
 
+@validate_call
+def command_update_password_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
+	user = command_get_user(id = id, db = db)
+	
+	passwordPlainText = userInfo.password_new
+
+	user["password"] = HashPassword.getHash(password = passwordPlainText)
+
+	newTable = [user for user in db if user['id'] != id]
+	newTable.append(user)
+	return (newTable, user)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
