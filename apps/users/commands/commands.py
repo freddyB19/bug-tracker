@@ -62,8 +62,8 @@ class HashPassword(Hashed):
 		
 
 class ValidateHashedPassword(ValidateHash):
-	def is_validate(passwordPlainText: TypePasswordHashed, passwordHashed: TypePasswordHashed) -> bool:
-		passwordBytes = hashPassword.dump_python(password)
+	def is_validate(passwordPlainText: str, passwordHashed: TypePasswordHashed) -> bool:
+		passwordBytes = hashPassword.dump_python(passwordPlainText)
 		
 		return bcrypt.checkpw(passwordBytes, passwordHashed)
 
@@ -99,12 +99,17 @@ def command_delete_user(id, db:List[Dict] | None = None) -> bool:
 
 
 @validate_call
-def command_update_email_user(id, email, db:List[Dict] | None = None) -> bool:
+def command_update_email_user(id, userInfo, db:List[Dict] | None = None) -> bool:
 	user = command_get_user(id = id, db = db)
 
-	print(email)
+	passwordHashed = user['password']
+	passwordPlainText = userInfo.password
 
-	user['email'] = email
+	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
+		raise ValueError("Credencial invalida, la contraseñas no coincide.")
+
+
+	user['email'] = userInfo.email
 	
 	newTable = [user for user in db if user['id'] != id]
 
