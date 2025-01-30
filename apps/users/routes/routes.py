@@ -82,7 +82,7 @@ def delete_user(id: int) -> Response:
 	)
 
 
-@router.patch("/{id}", 
+@router.patch("/{id}/email", 
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserEmailResponse
 )
