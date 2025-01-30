@@ -106,7 +106,7 @@ def command_update_email_user(id, userInfo, db:List[Dict] | None = None) -> bool
 	passwordPlainText = userInfo.password
 
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
-		raise ValueError("Credencial invalida, la contraseñas no coincide.")
+		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
 
 	user['email'] = userInfo.email
