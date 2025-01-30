@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy import DeclarativeBase
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 
 DB_URL = "sqlite:///./bug_tracker.db"
 
