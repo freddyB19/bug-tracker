@@ -81,3 +81,27 @@ class UserEmailResponse(BaseModel):
 	
 	id: int
 	email: str
+
+
+class UserPassword(BaseModel):
+	password_new: str
+	password_confirm: str
+
+	@field_validator("password_new")
+	@classmethod
+	def validate_password(cls, data: str):
+		message_error = ""
+		
+		if len(data) > 4:
+			return data
+		
+		message_error = "La contraseña debe ser mayor a cuatro caracteres"
+
+		raise ValueError(message_error)
+
+	@field_validator('password_confirm', mode="after")
+	@classmethod
+	def check_passwords_match(cls, value: str, info: ValidationInfo) -> str:
+		if value != info.data['password_new']:
+			raise ValueError('Las contraseñas no coinciden')
+		return value
