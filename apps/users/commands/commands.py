@@ -65,15 +65,7 @@ class ValidateHashedPassword(ValidateHash):
 	def is_validate(passwordPlainText: TypePasswordHashed, passwordHashed: TypePasswordHashed) -> bool:
 		passwordBytes = hashPassword.dump_python(password)
 		
-		try:
-			is_valid = True if bcrypt.checkpw(passwordBytes, passwordHashed) else False
-
-			if is_valid:
-				return is_valid
-
-			raise ValueError("Las contraseñas no coinciden")
-		except ValueError as e:
-			pass
+		return bcrypt.checkpw(passwordBytes, passwordHashed)
 
 
 @validate_call
