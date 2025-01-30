@@ -86,13 +86,13 @@ def delete_user(id: int) -> Response:
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserEmailResponse
 )
-def update_email(id: int, userEmail: schemas.UserEmail) -> schemas.UserEmailResponse:
+def update_email(id: int, user: schemas.UserEmail) -> schemas.UserEmailResponse:
 
 	try:
 		"""
 		Todo esto es solo prueba mientras termino la DB
 		"""
-		result = commands.command_update_email_user(db = DB_USERS, id = id, email = userEmail.email)
+		result = commands.command_update_email_user(db = DB_USERS, id = id, userInfo = user)
 		DB_USERS.clear()
 		DB_USERS.extend(result[0]) 
 	except ValueError as e:
