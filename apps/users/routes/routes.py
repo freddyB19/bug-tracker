@@ -97,7 +97,7 @@ def update_email(id: int, user: schemas.UserEmail) -> schemas.UserEmailResponse:
 		DB_USERS.extend(result[0]) 
 	except ValueError as e:
 		return Response(
-			content = "No existe este usuario",
+			content = str(e),
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
