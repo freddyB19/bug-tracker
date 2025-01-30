@@ -72,6 +72,7 @@ class UserResponse(UserBase):
 
 class UserEmail(BaseModel):
 	email: str
+	password: str
 
 
 
