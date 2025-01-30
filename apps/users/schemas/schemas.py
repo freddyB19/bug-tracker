@@ -6,12 +6,24 @@ from pydantic import ConfigDict
 from pydantic import StrictBytes
 from pydantic import field_validator
 from pydantic import ValidationInfo
+from pydantic import ValidationError, WrapValidator
 
+def len_string_field(value:str, handler, info: ValidationInfo):
+	if len(value) >= 4 and len(value) <= 20:
+		return value
+
+	message_error = f"La logitud debe ser entre 4 y 20 caracteres"
+	message_error += f" en ({info.field_name})"
+
+	raise ValueError(message_error)
+		
+
+LenStringField = Annotated[str, WrapValidator(len_string_field)]
 
 class UserBase(BaseModel):
-	name: str
+	name: LenStringField
 	email: str
-	username: str
+	username: LenStringField
 	
 
 class UserRequest(UserBase):
