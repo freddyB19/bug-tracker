@@ -103,3 +103,26 @@ def update_email(id: int, user: schemas.UserEmail) -> schemas.UserEmailResponse:
 
 
 	return result[1] 
+
+
+@router.patch("/{id}/password", 
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.UserEmailResponse
+)
+def update_password(id: int, user: schemas.UserPassword) -> schemas.UserEmailResponse:
+
+	try:
+		"""
+		Todo esto es solo prueba mientras termino la DB
+		"""
+		result = commands.command_update_password_user(db = DB_USERS, id = id, userInfo = user)
+		DB_USERS.clear()
+		DB_USERS.extend(result[0]) 
+	except ValueError as e:
+		return Response(
+			content = str(e),
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+
+	return result[1] 
