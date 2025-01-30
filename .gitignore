@@ -1,5 +1,7 @@
 # Folders
 modules/home/
+restclient/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
