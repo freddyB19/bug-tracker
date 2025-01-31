@@ -1,4 +1,8 @@
+from typing import Union
+from typing import Optional
+
 from typing_extensions import Annotated
+
 
 from pydantic import Field
 from pydantic import BaseModel
@@ -6,7 +10,9 @@ from pydantic import ConfigDict
 from pydantic import StrictBytes
 from pydantic import field_validator
 from pydantic import ValidationInfo
-from pydantic import ValidationError, WrapValidator
+from pydantic import WrapValidator
+
+
 
 def len_string_field(value:str, handler, info: ValidationInfo):
 	if len(value) >= 4 and len(value) <= 20:
@@ -104,4 +110,38 @@ class UserPassword(BaseModel):
 	def check_passwords_match(cls, value: str, info: ValidationInfo) -> str:
 		if value != info.data['password_new']:
 			raise ValueError('Las contraseñas no coinciden')
+		return value
+
+
+
+class UserUpdatate(BaseModel):
+	name: Optional[str] = None
+	username: Optional[str] = None
+	email: Optional[str] = None
+	password: Optional[str] = None
+	password_repeat: Optional[str] = None
+	
+	@field_validator("name", "username", mode="after")
+	@classmethod
+	def validate_name(cls, value):
+		if len(value) < 4 or len(value) > 20:
+			raise ValueError("La longitud debe ser entre 4-20 caracteres")
+
+		return value
+
+	@field_validator("password", mode="after")
+	@classmethod
+	def  validate_password(cls, value, info: ValidationInfo):
+
+		if len(value) < 4:
+			raise ValueError("Debe ingresar una contraseña mayor a cuatro caracteres")
+
+		return value
+
+	@field_validator("password_repeat", mode="after")
+	@classmethod
+	def  validate_password_repeat(cls, value, info: ValidationInfo):
+		if value != info.data.get("password"):
+			raise ValueError("Las contraseñas no coinciden")
+
 		return value
