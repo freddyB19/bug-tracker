@@ -122,7 +122,7 @@ def command_update_email_user(id, userInfo, db:List[Dict] | None = None) -> bool
 @validate_call
 def command_update_password_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
 	user = command_get_user(id = id, db = db)
-	
+
 	passwordPlainText = userInfo.password_new
 
 	user["password"] = HashPassword.getHash(password = passwordPlainText)
@@ -131,7 +131,27 @@ def command_update_password_user(id, userInfo, db: List[Dict] | None = None) -> 
 	newTable.append(user)
 	return (newTable, user)
 
+@validate_call
+def command_update_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
+	user = command_get_user(id = id, db = db)
 
+	new_name = userInfo.name if userInfo.name else False
+	new_email = userInfo.email if userInfo.email else False 
+	new_username = userInfo.username if userInfo.username else False
+	new_password = userInfo.password if userInfo.password else False
+
+
+	user['name'] = user['name'] if not new_name else new_name
+	user['email'] = user['email'] if not new_email else new_email
+	user['username'] = user['username'] if not new_username else new_username
+	user['password'] = user['password'] if not new_password else HashPassword.getHash(new_password)
+
+
+	newTable = [user for user in db if user['id'] != id]
+
+	newTable.append(user)
+
+	return (newTable, user) 
 
 
 
