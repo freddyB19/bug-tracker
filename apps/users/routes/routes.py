@@ -1,10 +1,15 @@
 from typing import Dict
 from typing import List
 
+from typing_extensions import Annotated
+
+
 from fastapi import status
 from fastapi import Depends
 from fastapi import APIRouter
 from fastapi import Response
+from fastapi import Body
+
 
 
 from pydantic import ValidationError
@@ -126,3 +131,25 @@ def update_password(id: int, user: schemas.UserPassword) -> schemas.UserEmailRes
 
 
 	return result[1] 
+
+
+@router.patch("/{id}", 
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.UserResponse
+)
+def update_user(id, user: Annotated[schemas.UserUpdatate, Body()]) -> schemas.UserResponse:
+
+	try:
+		data = schemas.UserUpdatate.model_validate(user)
+
+		result = commands.command_update_user(db = DB_USERS, userInfo = data, id = id) 
+		DB_USERS.clear()
+		DB_USERS.extend(result[0]) 
+	except Exception as e:
+		return Response(
+			content = str(e),
+			status_code = status.HTTP_400_BAD_REQUEST
+		)
+
+
+	return result[1]
