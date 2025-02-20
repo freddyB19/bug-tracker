@@ -145,3 +145,8 @@ class UserUpdatate(BaseModel):
 			raise ValueError("Las contraseñas no coinciden")
 
 		return value
+
+
+class UserLogin(BaseModel):
+	email: str
+	password: str 
