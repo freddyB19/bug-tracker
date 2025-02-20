@@ -26,12 +26,12 @@ app = FastAPI()
 def validation_error_exception_handler(request: Request, exc: RequestValidationError):
 	error = exc.errors()[0]
 
-	message = error['msg'].replace("Value error,", "")
+	message = error['msg'].replace("Value error,", "").strip()
 	detail = f"Input error: {error['input']}" 
 	
 	return JSONResponse(
 		 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-		 content = {"messge": f"{message}", "detail": detail}
+		 content = {"message": f"{message}", "detail": detail}
 	)
 
 Model.metadata.create_all(engine)
