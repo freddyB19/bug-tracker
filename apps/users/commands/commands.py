@@ -151,7 +151,34 @@ def command_update_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
 
 	newTable.append(user)
 
-	return (newTable, user) 
+	return (newTable, user)
+
+@validate_call
+def command_login(user, db:List[Dict] | None = None) -> Dict[str, int | str]:
+	data = [userInfo for userInfo in db if userInfo["email"] == user.email]
+
+	if not data:
+		raise ValueError(f"Credencial invalida, no exite un usuario con ese email: {user.email}")
+
+	userResult = data.pop()
+
+	passwordHashed = userResult['password']
+	passwordPlainText = user.password
+
+	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
+		raise ValueError("Credencial invalida, la contraseña no coincide.")
+
+
+	return userResult
+
+
+
+
+
+
+
+
+
 
 
 
