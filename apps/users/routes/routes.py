@@ -157,9 +157,9 @@ def update_user(id, user: Annotated[schemas.UserUpdatate, Body()]) -> schemas.Us
 
 @router.post("/login",
 	status_code = status.HTTP_200_OK,
-	response_model = schemas.UserResponse
+	response_model = schemas.UserLoginResponse
 )
-def login(user: schemas.UserLogin) -> schemas.UserResponse:
+def login(user: schemas.UserLogin) -> schemas.UserLoginResponse:
 	try:
 		result = commands.command_login(user = user, db = DB_USERS)
 	except Exception as e:
