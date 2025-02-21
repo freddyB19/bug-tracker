@@ -155,3 +155,10 @@ class UserUpdatate(BaseModel):
 class UserLogin(BaseModel):
 	email: str
 	password: str 
+
+
+class TokenRefresh(BaseModel):
+	token: str
+
+class TokensResponse(BaseModel):
+	auth: AuthUserSchema
