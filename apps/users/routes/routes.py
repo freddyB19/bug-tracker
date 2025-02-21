@@ -169,3 +169,21 @@ def login(user: schemas.UserLogin) -> schemas.UserLoginResponse:
 		)
 
 	return result
+
+
+@router.post("/refresh",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.TokensResponse
+)
+def refresh_token(token: schemas.TokenRefresh) -> schemas.TokensResponse:
+
+	result = commands.command_refresh_token(token = token.token)
+
+	if not result.get("auth", False):
+
+		return Response(
+			content = result.get("message"),
+			status_code = status.HTTP_400_BAD_REQUEST
+		)
+
+	return result
