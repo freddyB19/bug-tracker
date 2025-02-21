@@ -6,12 +6,14 @@ from typing import Optional
 from pydantic import validate_call
 
 from apps.users.models import User
+from .utils.password import HashPassword
+from .utils.password import ValidateHashedPassword
+from .utils.password import user_properties_serializer
 from apps.utils.token.token import create_token
 from apps.utils.token.token import verify_token
+from apps.utils.token.token import decode_token
 from apps.utils.token.token import create_refresh_token
-from apps.users.commands.utils.password import HashPassword
-from apps.users.commands.utils.password import ValidateHashedPassword
-from .utils.password import user_properties_serializer
+
 
 
 
@@ -130,21 +132,23 @@ def command_login(user, db:List[Dict] | None = None) -> Dict[str, int | str]: #U
 
 
 
+@validate_call
+def command_refresh_token(token: str)-> Dict[str, str]:
+	token_validation = verify_token(token)
 
+	if not token_validation.get("state"):
+		return token_validation
 
+	user = decode_token(token)
+	
+	token = create_token(infoDict = user)
+	refresh_token = create_refresh_token(infoDict = user)
 
+	tokens =  {
+		'auth': {
+			"token": token,
+			"refresh": refresh_token
+		}
+	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	return tokens
