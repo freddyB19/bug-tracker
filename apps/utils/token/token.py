@@ -70,3 +70,6 @@ def create_refresh_token(infoDict: Dict):
 	token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM_JWT)
 
 	return token
+
+def decode_token(token: str) -> Dict[str, str | int]:
+	return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM_JWT])
