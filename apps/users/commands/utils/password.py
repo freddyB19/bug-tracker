@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from typing import Dict
 from typing_extensions import Annotated
 
 import bcrypt
@@ -21,8 +22,14 @@ TypePasswordHashed = Annotated[
 ]
 
 
-hashPassword = TypeAdapter(TypePassword)
+TypeDecodePassword = Annotated[
+	TypePasswordHashed,
+	PlainSerializer(lambda value: value.decode('utf-8'), return_type=str)
 
+]
+
+hashPassword = TypeAdapter(TypePassword)
+decodePassword = TypeAdapter(TypeDecodePassword)
 
 class Hashed(ABC):
 	
@@ -56,3 +63,9 @@ class ValidateHashedPassword(ValidateHash):
 		passwordBytes = hashPassword.dump_python(passwordPlainText)
 		
 		return bcrypt.checkpw(passwordBytes, passwordHashed)
+
+
+def user_properties_serializer(user: Dict) -> Dict:
+	str_password = decodePassword.dump_python(user['password'])
+	user['password'] = str_password
+	return user
