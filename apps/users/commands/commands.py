@@ -6,8 +6,13 @@ from typing import Optional
 from pydantic import validate_call
 
 from apps.users.models import User
+from apps.utils.token.token import create_token
+from apps.utils.token.token import verify_token
+from apps.utils.token.token import create_refresh_token
 from apps.users.commands.utils.password import HashPassword
 from apps.users.commands.utils.password import ValidateHashedPassword
+from .utils.password import user_properties_serializer
+
 
 
 @validate_call
@@ -110,8 +115,18 @@ def command_login(user, db:List[Dict] | None = None) -> Dict[str, int | str]: #U
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
 		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
+	user = user_properties_serializer(userResult)
+	token = create_token(infoDict = user)
+	refresh_token = create_refresh_token(infoDict = user)
 
-	return userResult
+	user.update({
+		'auth': {
+			"token": token,
+			"refresh": refresh_token
+		}
+	})
+
+	return user
 
 
 
