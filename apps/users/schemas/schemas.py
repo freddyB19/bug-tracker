@@ -69,17 +69,11 @@ class UserRequest(UserBase):
 			raise ValueError('Las contraseñas no coinciden')
 		return value
 
-class AuthUserSchema(BaseModel):
-	token: str
-	refresh: str
-
 
 class UserResponse(UserBase):
 	id: int
 	password: StrictBytes | str
 
-class UserLoginResponse(UserResponse):
-	auth: AuthUserSchema
 
 class UserEmail(BaseModel):
 	email: str
@@ -157,8 +151,15 @@ class UserLogin(BaseModel):
 	password: str 
 
 
+class AuthUserSchema(BaseModel):
+	token: str
+	refresh: str
+
 class TokenRefresh(BaseModel):
 	token: str
 
 class TokensResponse(BaseModel):
+	auth: AuthUserSchema
+
+class UserLoginResponse(UserResponse):
 	auth: AuthUserSchema
