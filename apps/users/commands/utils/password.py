@@ -10,6 +10,7 @@ from pydantic import validate_call
 from pydantic import PlainSerializer
 from pydantic.type_adapter import TypeAdapter
 
+
 TypePassword = Annotated[
 	str, 
 	Field(frozen=True, strict=True),
