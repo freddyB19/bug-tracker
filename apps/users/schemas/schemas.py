@@ -72,7 +72,6 @@ class UserRequest(UserBase):
 
 class UserResponse(UserBase):
 	id: int
-	password: StrictBytes | str
 
 
 class UserEmail(BaseModel):
