@@ -46,14 +46,16 @@ def command_create_user(user: schemas.UserRequest)-> User:
 	return new_user
 
 @validate_call
-def command_get_user(id: int, db:List[Dict] | None = None) -> Dict[str, str]:  #User
+def command_get_user(user_id: int) -> User:
 	
-	user = [user for user in db if user["id"] == id]
+	db = next(get_db())
 
-	if not user:
-		raise ValueError("Not Found")
+	user = db.get(User, user_id)
 
-	return user.pop()
+	if user is None:
+		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+
+	return user
 
 @validate_call
 def command_delete_user(id, db:List[Dict] | None = None) -> bool:
