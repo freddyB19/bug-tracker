@@ -42,21 +42,19 @@ def create_user(user: schemas.UserRequest) -> schemas.UserResponse:
 			status_code = status.HTTP_400_BAD_REQUEST
 		)
 		
-	print(new_user)
-
 	return new_user
 
 @router.get("/{id}", 
 	response_model = schemas.UserResponse, 
 	status_code = status.HTTP_200_OK
 )
-def get_users(id: int) -> schemas.UserResponse:
+def get_user(id: int) -> schemas.UserResponse:
 
 	try:
-		user = commands.command_get_user(db = DB_USERS, id = id)
+		user = commands.command_get_user(user_id = id)
 	except ValueError as e:
 		return Response(
-			content = "No existe este usuario",
+			content = str(e),
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
