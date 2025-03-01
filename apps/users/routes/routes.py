@@ -34,16 +34,15 @@ def get_hello_word() -> Dict[str, str]:
 	status_code=status.HTTP_201_CREATED
 ) 
 def create_user(user: schemas.UserRequest) -> schemas.UserResponse:
-	print(user)
 	try:
-		
-		new_user = commands.command_create_user(**user.model_dump())
-		DB_USERS.append(new_user)
-	except ValidationError as e:
+		new_user = commands.command_create_user(user = user)
+	except ValueError as e:
 		return Response(
-			content = "Los datos ingresados son invalidos",
+			content = str(e) if str(e) else "Los datos ingresados son invalidos",
 			status_code = status.HTTP_400_BAD_REQUEST
 		)
+		
+	print(new_user)
 
 	return new_user
 
