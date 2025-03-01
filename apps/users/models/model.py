@@ -18,11 +18,6 @@ class User(Model):
 	username: Mapped[str] = mapped_column(String(20), unique=True)
 	password: Mapped[str] = mapped_column(String)
 
-
-	projects: Mapped[List["Projects"]] = relationship(
-		back_populates = "user" 
-	)
-
 	def __repr__(self):
 		return f"User(id={self.id}, name={self.name}, email={self.email}, username={self.username})"
 
