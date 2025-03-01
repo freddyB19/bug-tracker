@@ -24,7 +24,7 @@ engine = create_engine(
 
 session = sessionmaker(autoflush=False, bind=engine)
 
-def ge_db():
+def get_db():
 	db = session()
 	try:
 		yield db
