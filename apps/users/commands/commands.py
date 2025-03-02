@@ -3,14 +3,17 @@ from typing import List
 from typing import Dict
 from typing import Optional
 
+from sqlalchemy import select
+
 from pydantic import validate_call
+
 
 from apps import get_db
 from apps.users.schemas import schemas
 from apps.users.models import User
 from .utils.password import HashPassword
 from .utils.password import ValidateHashedPassword
-from .utils.password import user_properties_serializer
+from .utils.utils import user_properties_serializer
 from apps.utils.token.token import create_token
 from apps.utils.token.token import verify_token
 from apps.utils.token.token import decode_token
@@ -112,21 +115,28 @@ def command_update_password_user(user_id: int, infoUpdate: schemas.UserPassword)
 
 
 @validate_call
-def command_login(user, db:List[Dict] | None = None) -> Dict[str, int | str]: #User
-	data = [userInfo for userInfo in db if userInfo["email"] == user.email]
+def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
+	db = next(get_db())
 
-	if not data:
-		raise ValueError(f"Credencial invalida, no exite un usuario con ese email: {user.email}")
+	userResult = db.scalar(
+		select(User)
+		.where(User.email == infoLogin.email)
+	)
 
-	userResult = data.pop()
+	if userResult is None:
+		raise ValueError(f"Credencial invalida, no exite un usuario con ese email: {infoLogin.email}")
 
-	passwordHashed = userResult['password']
-	passwordPlainText = user.password
+	passwordHashed = userResult.password
+	passwordPlainText = infoLogin.password
 
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
 		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
-	user = user_properties_serializer(userResult)
+	user = user_properties_serializer(user = userResult)
+	
+	if user is None:
+		raise ValueError("Ha ocurrido un error interno al momento de serializar User")
+	
 	token = create_token(infoDict = user)
 	refresh_token = create_refresh_token(infoDict = user)
 
@@ -138,7 +148,6 @@ def command_login(user, db:List[Dict] | None = None) -> Dict[str, int | str]: #U
 	})
 
 	return user
-
 
 
 @validate_call
