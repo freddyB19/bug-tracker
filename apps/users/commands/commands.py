@@ -94,16 +94,22 @@ def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> Us
 	return user
 
 @validate_call
-def command_update_password_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
-	user = command_get_user(id = id, db = db)
+def command_update_password_user(user_id, infoUpdate: schemas.UserPassword) -> User:
+	db = next(get_db())
 
-	passwordPlainText = userInfo.password_new
+	user = db.get(User, user_id)
 
-	user["password"] = HashPassword.getHash(password = passwordPlainText)
+	if user is None:
+		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
 
-	newTable = [user for user in db if user['id'] != id]
-	newTable.append(user)
-	return (newTable, user)
+	passwordPlainText = infoUpdate.password_new
+	user.password = HashPassword.getHash(password = passwordPlainText)
+
+	db.commit()
+	db.refresh(user)
+
+	return user
+
 
 @validate_call
 def command_update_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
