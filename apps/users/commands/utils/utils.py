@@ -1,7 +1,10 @@
+from typing import Dict
+
 from pydantic import ValidationError
 
 from apps.users.models import User
 from apps.users.schemas import schemas
+from .password import decodePassword
 
 def user_properties_serializer(user: User) -> Dict[str, str | int]:
 	try:
