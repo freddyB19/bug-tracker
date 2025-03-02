@@ -58,12 +58,18 @@ def command_get_user(user_id: int) -> User:
 	return user
 
 @validate_call
-def command_delete_user(id, db:List[Dict] | None = None) -> bool:
-	user = command_get_user(id = id, db = db)
-	
-	newTable = [user for user in db if user['id'] != id]
+def command_delete_user(user_id) -> bool:
+	db = next(get_db())
 
-	return newTable
+	user = db.get(User, user_id)
+
+	if user is None:
+		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+
+	db.delete(user)
+	db.commit()
+
+	return user.username
 
 
 @validate_call
