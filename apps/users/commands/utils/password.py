@@ -58,7 +58,7 @@ class HashPassword(Hashed):
 
 		try:
 			return bcrypt.hashpw(passwordBytes, bcrypt.gensalt(10))
-		except ValidationError as e:
+		except TypeError as e:
 			raise ValueError("Error en el password, el tipo de dato ingresado no es valido")
 		
 
