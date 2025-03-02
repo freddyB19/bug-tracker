@@ -109,30 +109,8 @@ def update_password(id: int, user: schemas.UserPassword) -> schemas.UserEmailRes
 			content = str(e),
 			status_code = status.HTTP_404_NOT_FOUND
 		)
-		
+
 	return user
-
-
-@router.patch("/{id}", 
-	status_code = status.HTTP_200_OK,
-	response_model = schemas.UserResponse
-)
-def update_user(id, user: Annotated[schemas.UserUpdatate, Body()]) -> schemas.UserResponse:
-
-	try:
-		data = schemas.UserUpdatate.model_validate(user)
-
-		result = commands.command_update_user(db = DB_USERS, userInfo = data, id = id) 
-		DB_USERS.clear()
-		DB_USERS.extend(result[0]) 
-	except Exception as e:
-		return Response(
-			content = str(e),
-			status_code = status.HTTP_400_BAD_REQUEST
-		)
-
-
-	return result[1]
 
 
 @router.post("/login",
