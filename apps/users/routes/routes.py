@@ -119,7 +119,7 @@ def update_password(id: int, user: schemas.UserPassword) -> schemas.UserEmailRes
 )
 def login(user: schemas.UserLogin) -> schemas.UserLoginResponse:
 	try:
-		result = commands.command_login(user = user, db = DB_USERS)
+		result = commands.command_login(infoLogin = user)
 	except Exception as e:
 		return Response(
 			content = str(e),
