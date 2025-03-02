@@ -71,27 +71,27 @@ def command_delete_user(user_id) -> bool:
 
 	return user.username
 
-
 @validate_call
-def command_update_email_user(id, userInfo, db:List[Dict] | None = None) -> bool:
-	user = command_get_user(id = id, db = db)
+def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> User:
+	db = next(get_db())
 
-	passwordHashed = user['password']
-	passwordPlainText = userInfo.password
+	user = db.get(User, user_id)
+
+	if user is None:
+		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+	
+	passwordHashed = user.password
+	passwordPlainText = infoUpdate.password
 
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
 		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
+	user.email = infoUpdate.email
 
-	user['email'] = userInfo.email
-	
-	newTable = [user for user in db if user['id'] != id]
+	db.commit()
+	db.refresh(user)
 
-	newTable.append(user)
-
-	return (newTable, user)
-
-
+	return user
 
 @validate_call
 def command_update_password_user(id, userInfo, db: List[Dict] | None = None) -> tuple:
