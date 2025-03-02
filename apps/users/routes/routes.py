@@ -3,16 +3,11 @@ from typing import List
 
 from typing_extensions import Annotated
 
-
 from fastapi import status
 from fastapi import Depends
 from fastapi import APIRouter
 from fastapi import Response
 from fastapi import Body
-
-
-
-from pydantic import ValidationError
 
 from apps.users.schemas import schemas
 from apps.users.commands import commands
