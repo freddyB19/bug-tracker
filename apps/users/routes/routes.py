@@ -67,20 +67,15 @@ def get_user(id: int) -> schemas.UserResponse:
 def delete_user(id: int) -> Response:
 	
 	try:
-		"""
-		Todo esto es solo prueba mientras termino la DB
-		"""
-		result = commands.command_delete_user(db = DB_USERS, id = id)
-		DB_USERS.clear()
-		DB_USERS.extend(result) 
+		username = commands.command_delete_user(user_id = id)
 	except ValueError as e:
 		return Response(
-			content = "No existe este usuario",
+			content = str(e),
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
 	return Response(
-		content = "Usuario eliminado con exito"
+		content = f"Usuario: '{username}' eliminado con exito"
 	)
 
 
