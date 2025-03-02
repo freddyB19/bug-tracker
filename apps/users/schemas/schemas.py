@@ -110,41 +110,6 @@ class UserPassword(BaseModel):
 			raise ValueError('Las contraseñas no coinciden')
 		return value
 
-
-
-class UserUpdatate(BaseModel):
-	name: Optional[str] = None
-	username: Optional[str] = None
-	email: Optional[str] = None
-	password: Optional[str] = None
-	password_repeat: Optional[str] = None
-	
-	@field_validator("name", "username", mode="after")
-	@classmethod
-	def validate_name(cls, value):
-		if len(value) < 4 or len(value) > 20:
-			raise ValueError("La longitud debe ser entre 4-20 caracteres")
-
-		return value
-
-	@field_validator("password", mode="after")
-	@classmethod
-	def  validate_password(cls, value, info: ValidationInfo):
-
-		if len(value) < 4:
-			raise ValueError("Debe ingresar una contraseña mayor a cuatro caracteres")
-
-		return value
-
-	@field_validator("password_repeat", mode="after")
-	@classmethod
-	def  validate_password_repeat(cls, value, info: ValidationInfo):
-		if value != info.data.get("password"):
-			raise ValueError("Las contraseñas no coinciden")
-
-		return value
-
-
 class UserLogin(BaseModel):
 	email: str
 	password: str 
