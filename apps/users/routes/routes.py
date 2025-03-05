@@ -71,7 +71,7 @@ def delete_user(id: int, token: str = Depends(validate_authorization)) -> Respon
 	)
 
 
-@router.patch("/{id}/email", 
+@router.put("/{id}/email", 
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserEmailResponse
 )
@@ -88,7 +88,7 @@ def update_email(id: int, user: schemas.UserEmail, token: str = Depends(validate
 	return user
 
 
-@router.patch("/{id}/password", 
+@router.put("/{id}/password", 
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserEmailResponse
 )
