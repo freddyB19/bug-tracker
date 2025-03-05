@@ -115,6 +115,36 @@ def command_update_password_user(user_id: int, infoUpdate: schemas.UserPassword)
 
 
 @validate_call
+def command_update_username_user(user_id: int, infoUpdate: schemas.UserUsername) -> User:
+	db = next(get_db())
+
+	user = db.get(User, user_id)
+
+	if user is None:
+		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+
+	if user.username == infoUpdate.username:
+		raise ValueError("Tu nuevo nombre de usuario debe ser diferente al que posees actualmente.")
+
+	sql = (
+		select(User)
+		.where(User.username == infoUpdate.username)
+	)
+
+	if db.scalar(sql) is not None:
+		raise ValueError(f"Ya existe un usuario con ese username: '{infoUpdate.username}'")
+
+	user.username = infoUpdate.username
+
+	db.commit()
+	db.refresh(user)
+
+	return user
+
+
+
+
+@validate_call
 def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
 	db = next(get_db())
 
