@@ -110,6 +110,15 @@ class UserPassword(BaseModel):
 			raise ValueError('Las contraseñas no coinciden')
 		return value
 
+
+class UserUsername(BaseModel):
+	username: str
+	password: str
+
+class UserUsernameResponse(BaseModel):
+	id: int
+	username: str
+
 class UserLogin(BaseModel):
 	email: str
 	password: str 
