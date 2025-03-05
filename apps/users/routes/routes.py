@@ -8,7 +8,7 @@ from fastapi import status
 from fastapi import Depends
 from fastapi import Response
 from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 
 from apps.users.schemas import schemas
 from apps.users.commands import commands
@@ -27,8 +27,8 @@ def create_user(user: schemas.UserRequest) -> schemas.UserResponse:
 	try:
 		new_user = commands.command_create_user(user = user)
 	except ValueError as e:
-		return Response(
-			content = str(e) if str(e) else "Los datos ingresados son invalidos",
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_400_BAD_REQUEST
 		)
 		
@@ -43,8 +43,8 @@ def get_user(id: int) -> schemas.UserResponse:
 	try:
 		user = commands.command_get_user(user_id = id)
 	except ValueError as e:
-		return Response(
-			content = str(e),
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
@@ -59,13 +59,15 @@ def delete_user(id: int, token: str = Depends(validate_authorization)) -> Respon
 	try:
 		username = commands.command_delete_user(user_id = id)
 	except ValueError as e:
-		return Response(
-			content = str(e),
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
-	return Response(
-		content = f"Usuario: '{username}' eliminado con exito"
+	return JSONResponse(
+		content = {
+			"message": f"Usuario: '{username}' eliminado con exito"
+		}
 	)
 
 
@@ -78,8 +80,8 @@ def update_email(id: int, user: schemas.UserEmail, token: str = Depends(validate
 	try:
 		user = commands.command_update_email_user(user_id = id, infoUpdate = user) 
 	except ValueError as e:
-		return Response(
-			content = str(e),
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
@@ -95,8 +97,8 @@ def update_password(id: int, user: schemas.UserPassword, token: str = Depends(va
 	try:
 		user = commands.command_update_password_user(user_id = id, infoUpdate = user)
 	except ValueError as e:
-		return Response(
-			content = str(e),
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
@@ -112,8 +114,8 @@ def update_username(id: int, user: schemas.UserUsername,token: str = Depends(val
 	try:
 		user = commands.command_update_username_user(user_id = id, infoUpdate = user)
 	except ValueError as e:
-		return Response(
-			content = str(e),
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
@@ -127,8 +129,8 @@ def login(user: schemas.UserLogin) -> schemas.UserLoginResponse:
 	try:
 		result = commands.command_login(infoLogin = user)
 	except Exception as e:
-		return Response(
-			content = str(e),
+		return JSONResponse(
+			content = {"message": str(e)},
 			status_code = status.HTTP_400_BAD_REQUEST
 		)
 
@@ -145,8 +147,8 @@ def refresh_token(token: schemas.TokenRefresh) -> schemas.TokensResponse:
 
 	if not result.get("auth", False):
 
-		return Response(
-			content = result.get("message"),
+		return JSONResponse(
+			content = {"message": result.get("message")},
 			status_code = status.HTTP_400_BAD_REQUEST
 		)
 
