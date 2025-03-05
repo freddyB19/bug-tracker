@@ -1,8 +1,14 @@
 import datetime
 from typing import Dict
 
+from typing_extensions import Annotated
 
 import jwt
+
+from fastapi import status
+from fastapi import Header
+from fastapi import HTTPException
+
 
 from apps import (
 	SECRET_KEY,
@@ -73,3 +79,27 @@ def create_refresh_token(infoDict: Dict):
 
 def decode_token(token: str) -> Dict[str, str | int]:
 	return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM_JWT])
+
+def extract_token(auth: str) -> str:
+	return auth.lstrip("Bearer").strip(" ")
+
+
+def validate_authorization(authorization: Annotated[str | None, Header()] = None) -> str:
+	if authorization is None:
+		raise HTTPException(
+				status_code = status.HTTP_401_UNAUTHORIZED, 
+				detail = "Ausencia del token en la cabecera.",
+				headers={"WWW-Authenticate": "Bearer"},
+			)
+	token = extract_token(auth = authorization)
+	
+	result = verify_token(token = token)
+
+	if not result['state']:
+		raise HTTPException(
+				status_code = status.HTTP_401_UNAUTHORIZED, 
+				detail = "Token no valido",
+				headers={"WWW-Authenticate": "Bearer"},
+			)
+
+	return token
