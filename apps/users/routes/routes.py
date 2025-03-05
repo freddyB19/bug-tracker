@@ -3,20 +3,21 @@ from typing import List
 
 from typing_extensions import Annotated
 
+from fastapi import Body
 from fastapi import status
 from fastapi import Depends
-from fastapi import APIRouter
 from fastapi import Response
-from fastapi import Body
+from fastapi import APIRouter
+from fastapi import HTTPException
 
 from apps.users.schemas import schemas
 from apps.users.commands import commands
+from apps.utils.token.token import validate_authorization
 
 
 router = APIRouter(prefix = "/user")
 
 DB_USERS = []
-
 
 @router.get("/hello")
 def get_hello_word() -> Dict[str, str]:
@@ -59,7 +60,7 @@ def get_user(id: int) -> schemas.UserResponse:
 @router.delete("/{id}",
 	status_code = status.HTTP_204_NO_CONTENT
 )
-def delete_user(id: int) -> Response:
+def delete_user(id: int, token: str = Depends(validate_authorization)) -> Response:
 	
 	try:
 		username = commands.command_delete_user(user_id = id)
@@ -78,7 +79,7 @@ def delete_user(id: int) -> Response:
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserEmailResponse
 )
-def update_email(id: int, user: schemas.UserEmail) -> schemas.UserEmailResponse:
+def update_email(id: int, user: schemas.UserEmail, token: str = Depends(validate_authorization)) -> schemas.UserEmailResponse:
 
 	try:
 		user = commands.command_update_email_user(user_id = id, infoUpdate = user) 
@@ -95,7 +96,7 @@ def update_email(id: int, user: schemas.UserEmail) -> schemas.UserEmailResponse:
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserEmailResponse
 )
-def update_password(id: int, user: schemas.UserPassword) -> schemas.UserEmailResponse:
+def update_password(id: int, user: schemas.UserPassword, token: str = Depends(validate_authorization)) -> schemas.UserEmailResponse:
 
 	try:
 		user = commands.command_update_password_user(user_id = id, infoUpdate = user)
