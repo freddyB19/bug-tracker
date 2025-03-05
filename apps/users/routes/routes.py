@@ -109,6 +109,22 @@ def update_password(id: int, user: schemas.UserPassword, token: str = Depends(va
 	return user
 
 
+@router.put("/{id}/username",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.UserUsernameResponse
+)
+
+def update_username(id: int, user: schemas.UserUsername,token: str = Depends(validate_authorization)) -> schemas.UserUsernameResponse:
+	try:
+		user = commands.command_update_username_user(user_id = id, infoUpdate = user)
+	except ValueError as e:
+		return Response(
+			content = str(e),
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	return user
+
 @router.post("/login",
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.UserLoginResponse
