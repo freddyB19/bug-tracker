@@ -17,12 +17,6 @@ from apps.utils.token.token import validate_authorization
 
 router = APIRouter(prefix = "/user")
 
-DB_USERS = []
-
-@router.get("/hello")
-def get_hello_word() -> Dict[str, str]:
-	return {"message": "Hola mundo desde user"}
-
 
 @router.post(
 	"/", 
