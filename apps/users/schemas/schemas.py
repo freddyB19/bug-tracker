@@ -22,9 +22,34 @@ def len_string_field(value:str, handler, info: ValidationInfo):
 	message_error += f" en ({info.field_name})"
 
 	raise ValueError(message_error)
-		
+
+def validate_password(value:str, handler, info: ValidationInfo):
+	message_error = ""
+
+	if len(value) > 4:
+		return value
+
+	message_error = "La contraseña debe ser mayor a cuatro caracteres"
+
+	raise ValueError(message_error)
+
+
+
+def check_passwords_match(value: str, handler, info: ValidationInfo) -> str:
+	password = info.data.get('password', None)
+	if password is None:
+		return ""
+
+	if value == password:
+		return value
+	
+	raise ValueError('Las contraseñas no coinciden')
+	
 
 LenStringField = Annotated[str, WrapValidator(len_string_field)]
+ValidatePasswordField = Annotated[str, WrapValidator(validate_password)]
+CheckPasswordMatchField = Annotated[str, WrapValidator(check_passwords_match)]
+
 
 class UserBase(BaseModel):
 	name: LenStringField
@@ -33,8 +58,8 @@ class UserBase(BaseModel):
 	
 
 class UserRequest(UserBase):
-	password: str
-	password_repeat: str
+	password: ValidatePasswordField
+	password_repeat: CheckPasswordMatchField
 
 	@field_validator('email')
 	@classmethod
@@ -50,25 +75,6 @@ class UserRequest(UserBase):
 
 		raise ValueError(f"Debe ingresar un Email valido: email: {data}")
 
-	@field_validator("password")
-	@classmethod
-	def validate_password(cls, data: str):
-		message_error = ""
-		
-		if len(data) > 4:
-			return data
-		
-		message_error = "La contraseña debe ser mayor a cuatro caracteres"
-
-		raise ValueError(message_error)
-
-	@field_validator('password_repeat', mode="after")
-	@classmethod
-	def check_passwords_match(cls, value: str, info: ValidationInfo) -> str:
-		if value != info.data['password']:
-			raise ValueError('Las contraseñas no coinciden')
-		return value
-
 
 class UserResponse(UserBase):
 	id: int
@@ -79,7 +85,6 @@ class UserEmail(BaseModel):
 	password: str
 
 
-
 class UserEmailResponse(BaseModel):
 	model_config = ConfigDict(extra='ignore') 
 	
@@ -88,27 +93,8 @@ class UserEmailResponse(BaseModel):
 
 
 class UserPassword(BaseModel):
-	password_new: str
-	password_confirm: str
-
-	@field_validator("password_new")
-	@classmethod
-	def validate_password(cls, data: str):
-		message_error = ""
-		
-		if len(data) > 4:
-			return data
-		
-		message_error = "La contraseña debe ser mayor a cuatro caracteres"
-
-		raise ValueError(message_error)
-
-	@field_validator('password_confirm', mode="after")
-	@classmethod
-	def check_passwords_match(cls, value: str, info: ValidationInfo) -> str:
-		if value != info.data['password_new']:
-			raise ValueError('Las contraseñas no coinciden')
-		return value
+	password: ValidatePasswordField
+	password_repeat: CheckPasswordMatchField
 
 
 class UserUsername(BaseModel):
