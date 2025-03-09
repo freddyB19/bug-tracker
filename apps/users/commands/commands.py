@@ -105,7 +105,7 @@ def command_update_password_user(user_id: int, infoUpdate: schemas.UserPassword)
 	if user is None:
 		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
 
-	passwordPlainText = infoUpdate.password_new
+	passwordPlainText = infoUpdate.password
 	user.password = HashPassword.getHash(password = passwordPlainText)
 
 	db.commit()
