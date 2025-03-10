@@ -28,11 +28,20 @@ def set_choice_priority(value:str) -> str:
 	return value
 
 
+def check_length_title(value: str) -> str:
+	if len(value) > MAX_LENGTH_TITLE:
+		raise ValueError(f"El titulo es demasiado largo, debe ser menor o igual a {MAX_LENGTH_TITLE} caracteres")
+
+	if len(value) <= MIN_LENGTH_TITLE:
+		raise ValueError(f"El titulo es demasiado corto, debe ser mayor a {MIN_LENGTH_TITLE} caracteres")
+
+	return value
+
 LowerProrityField = Annotated[str, PlainValidator(
 	lambda value: value.lower()
 )]
 ChoiceProrityField = Annotated[LowerProrityField, AfterValidator(set_choice_priority)]
-
+LengthTitleField = Annotated[str, AfterValidator(check_length_title)]
 
 class ProjectBase(BaseModel):
 	title: str
@@ -46,17 +55,7 @@ class ProjectRequest(ProjectBase):
 		min_length = MIN_LENGTH_DESCRIPTION
 	)
 	priority: ChoiceProrityField
-
-	@field_validator('title')
-	@classmethod
-	def validate_title(cls, data:str) -> str:
-		if len(data) > MAX_LENGTH_TITLE:
-			raise ValueError(f"El titulo es demasiado largo, debe ser menor o igual a {MAX_LENGTH_TITLE} caracteres")
-
-		if len(data) <= MIN_LENGTH_TITLE:
-			raise ValueError(f"El titulo es demasiado corto, debe ser mayor a {MIN_LENGTH_TITLE} caracteres")
-
-		return data
+	title: LengthTitleField
 
 class ProjectResponse(ProjectBase):
 	id: int
