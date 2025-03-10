@@ -36,9 +36,12 @@ def command_create_project(project: schemas.ProjectRequest) -> Project:
 	return new_project
 
 
+@validate_call
+def command_get_project(project_id: int) -> Project:
+	db = next(get_db())
+	project = db.get(Project, project_id)
 
+	if project is None:
+		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
 
-
-
-
-
+	return project
