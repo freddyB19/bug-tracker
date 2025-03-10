@@ -1,5 +1,5 @@
 from typing import Optional
-
+from datetime import datetime
 from typing_extensions import Annotated
 
 from pydantic import Field
@@ -61,3 +61,5 @@ class ProjectRequest(ProjectBase):
 class ProjectResponse(ProjectBase):
 	id: int
 	user: UserResponse
+	created: datetime
+	updated: datetime
