@@ -1,7 +1,8 @@
 import enum
-
+from datetime import datetime
 from sqlalchemy import Enum
 from sqlalchemy  import String
+from sqlalchemy import func
 from sqlalchemy  import ForeignKey
 from sqlalchemy.orm  import Mapped 
 from sqlalchemy.orm  import relationship
@@ -24,6 +25,8 @@ class Project(Model):
 	title: Mapped[str] = mapped_column(String(30), nullable=False)
 	priority: Mapped[Enum] = mapped_column(Enum(ChoicesPrority), insert_default=ChoicesPrority.baja)
 	description: Mapped[str] = mapped_column(String(200))
+	created: Mapped[datetime] = mapped_column(insert_default = func.now())
+	updated: Mapped[datetime] = mapped_column(insert_default = func.now(), onupdate=func.now())
 	user_id: Mapped[int] = mapped_column(
 		ForeignKey(
 			'user.id',
