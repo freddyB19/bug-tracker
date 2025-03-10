@@ -7,7 +7,7 @@ from sqlalchemy.orm  import mapped_column
 from sqlalchemy.orm  import relationship
 
 from apps import Model
-
+from apps.projects.models.model import Project
 
 
 class User(Model):
@@ -17,6 +17,9 @@ class User(Model):
 	email: Mapped[str] = mapped_column(String, unique=True)
 	username: Mapped[str] = mapped_column(String(20), unique=True)
 	password: Mapped[str] = mapped_column(String)
+
+	projects: Mapped[List[Project]] = relationship(back_populates = "user")
+
 
 	def __repr__(self):
 		return f"User(id={self.id}, name={self.name}, email={self.email}, username={self.username})"
