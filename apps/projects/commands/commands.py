@@ -45,3 +45,19 @@ def command_get_project(project_id: int) -> Project:
 		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
 
 	return project
+
+@validate_call
+def command_update_title_project(project_id: int, infoUpdate: schemas.ProjectTitle) -> Project:
+	db = next(get_db())
+
+	project = db.get(Project, project_id)
+
+	if project is None:
+		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
+
+	project.title = infoUpdate.title
+
+	db.commit()
+	db.refresh(project)
+
+	return project
