@@ -68,6 +68,7 @@ class ProjectResponse(ProjectBase):
 
 
 class ProjectUpdate(BaseModel):
+	user_id: int
 	description: Optional[str | None] = None
 	title: Optional[LengthTitleField | None] = None
 	priority: Optional[ChoiceProrityField | None] = None
