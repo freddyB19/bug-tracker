@@ -8,6 +8,7 @@ from apps.projects.models import Project
 from apps.projects.schemas import schemas
 from apps.projects.models import ChoicesPrority
 
+from .utils.utils import update_project
 
 CHOICES:list = [choice.name for choice in ChoicesPrority]
 
@@ -46,8 +47,9 @@ def command_get_project(project_id: int) -> Project:
 
 	return project
 
+
 @validate_call
-def command_update_title_project(project_id: int, infoUpdate: schemas.ProjectTitle) -> Project:
+def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -> Project:
 	db = next(get_db())
 
 	project = db.get(Project, project_id)
@@ -55,26 +57,9 @@ def command_update_title_project(project_id: int, infoUpdate: schemas.ProjectTit
 	if project is None:
 		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
 
-	project.title = infoUpdate.title
-
+	update_project(project = project, infoUpdate = infoUpdate)
+	
 	db.commit()
 	db.refresh(project)
-
-	return project
-
-
-@validate_call
-def command_update_description_project(project_id: int, infoUpdate: schemas.ProjectDescription) -> Project:
-	db = next(get_db())
-
-	project = db.get(Project, project_id)
-
-	if project is None:
-		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
-
-	project.description = infoUpdate.description
-
-	db.commit()
-	db.refresh(project)
-
+	
 	return project
