@@ -60,6 +60,9 @@ def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -
 	if project is None:
 		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
 
+	if project.user_id != infoUpdate.user_id:
+		raise ValueError(f"El usuario no es dueño de este proyecto.")
+
 	update_project(project = project, infoUpdate = infoUpdate)
 	
 	db.commit()
