@@ -62,3 +62,14 @@ class ProjectResponse(ProjectBase):
 	user: UserResponse
 	created: datetime
 	updated: datetime
+
+
+class ProjectTitle(BaseModel):
+	title: LengthTitleField
+
+
+class ProjectSimpleResponse(ProjectBase):
+	id: int
+	created: datetime
+	updated: datetime
+
