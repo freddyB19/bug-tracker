@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter
 from fastapi import status
 from fastapi.responses import JSONResponse
@@ -81,3 +83,25 @@ def delete_project(id: int, project: schemas.ProjectDelete) -> JSONResponse:
 	return JSONResponse(
 		content={"message": f"Proyecto: con ID '{id}' eliminado con exito."}
 	)
+
+
+@router.get(
+	"/list/user",
+	status_code = status.HTTP_200_OK,
+	response_model = List[schemas.ProjectSimpleResponse]
+)
+def get_project_by_user(user_id: int, page: int = 0, pageSize: int = 10) -> List[schemas.ProjectSimpleResponse]:
+
+	try:
+		projects = commands.command_get_projects_user(
+			page = page,
+			pageSize = pageSize,
+			user_id = user_id
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	return projects
