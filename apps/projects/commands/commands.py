@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import select
 
 from pydantic import validate_call
@@ -7,6 +9,7 @@ from apps.users.models.model import User
 from apps.projects.models import Project
 from apps.projects.schemas import schemas
 from apps.projects.models import ChoicesPrority
+
 
 from .utils.utils import update_project
 
@@ -78,3 +81,20 @@ def command_delete_project(project_id: int, infoDelete: schemas.ProjectDelete) -
 
 	db.delete(project)
 	db.commit()
+
+@validate_call
+def command_get_projects_user(page: int, pageSize: int, user_id: int) -> List[Project]:
+	db = next(get_db())
+
+	sql = (
+		select(Project)
+		.join(User)
+		.where(Project.user_id == user_id)
+		.offset(page)
+		.limit(pageSize)
+	)
+
+	projects = db.scalars(sql).all()
+
+	return projects
+
