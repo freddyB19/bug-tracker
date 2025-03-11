@@ -59,6 +59,7 @@ class ProjectRequest(ProjectBase):
 	priority: ChoiceProrityField
 	title: LengthTitleField
 
+
 class ProjectResponse(ProjectBase):
 	id: int
 	user: UserResponse
@@ -66,21 +67,10 @@ class ProjectResponse(ProjectBase):
 	updated: datetime
 
 
-class ProjectTitle(BaseModel):
-	title: LengthTitleField
-
-
-class ProjectDescription(BaseModel):
-	description: str
-
-	@field_validator("description")
-	@classmethod
-	def validate_description(cls, value: str) -> str:
-		if len(value) <= MIN_LENGTH_DESCRIPTION:
-			raise ValueError(f"La descripción debe ser mayor a {MIN_LENGTH_DESCRIPTION} caracteres.")
-		if len(value) > MAX_LENGTH_DESCRIPTION:
-			raise ValueError(f"La descripción debe ser menor a {MAX_LENGTH_DESCRIPTION} caracteres.")
-		return value
+class ProjectUpdate(BaseModel):
+	description: Optional[str | None] = None
+	title: Optional[LengthTitleField | None] = None
+	priority: Optional[ChoiceProrityField | None] = None
 
 
 class ProjectSimpleResponse(ProjectBase):
