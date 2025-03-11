@@ -6,7 +6,7 @@ sys.path.append(os.path.join(BASE, "apps"))
 
 from fastapi import FastAPI
 from apps.users.routes import router as router_users
-from apps.projects.routes import router as router_project
+from apps.projects.routes import router_project
 
 from apps import engine
 from apps import Model

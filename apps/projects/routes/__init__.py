@@ -1,1 +1,1 @@
-from apps.projects.routes.routes import router
+from apps.projects.routes.routes import router_project
