@@ -42,30 +42,14 @@ def get_project(id: int) -> schemas.ProjectResponse:
 	return project
 
 
-@router.put(
-	"/{id}/title",
- 	status_code = status.HTTP_200_OK,
- 	response_model = schemas.ProjectSimpleResponse,
- )
-def update_title(id: int, project: schemas.ProjectTitle) -> schemas.ProjectSimpleResponse:
+@router.patch(
+	"/{id}",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.ProjectSimpleResponse
+)
+def update_project(id: int, project: schemas.ProjectUpdate) -> schemas.ProjectSimpleResponse:
 	try:
-		project = commands.command_update_title_project(project_id = id, infoUpdate = project)
-	except ValueError as e:
-		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
-		)
-
-	return project
-
-@router.put(
-	"/{id}/description",
- 	status_code = status.HTTP_200_OK,
- 	response_model = schemas.ProjectSimpleResponse
- )
-def update_description(id: int, project: schemas.ProjectDescription) -> schemas.ProjectSimpleResponse:
-	try:
-		project = commands.command_update_description_project(
+		project = commands.command_update_project(
 			project_id = id,
 			infoUpdate = project
 		)
@@ -74,5 +58,5 @@ def update_description(id: int, project: schemas.ProjectDescription) -> schemas.
 			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
-		
+
 	return project
