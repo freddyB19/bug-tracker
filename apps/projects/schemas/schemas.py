@@ -38,20 +38,11 @@ def check_length_title(value: str) -> str:
 	return value
 
 
-
-def check_length_description(value: str) -> str:
-	if len(value) <= MIN_LENGTH_DESCRIPTION:
-		raise ValueError(f"La descripción debe ser mayor a {MIN_LENGTH_DESCRIPTION} caracteres.")
-	if len(value) > MAX_LENGTH_DESCRIPTION:
-		raise ValueError(f"La descripción debe ser menor a {MAX_LENGTH_DESCRIPTION} caracteres.")
-	return value
-
 LowerProrityField = Annotated[str, PlainValidator(
 	lambda value: value.lower()
 )]
 ChoiceProrityField = Annotated[LowerProrityField, AfterValidator(set_choice_priority)]
 LengthTitleField = Annotated[str, AfterValidator(check_length_title)]
-LengthDescriptionField = Annotated[str, AfterValidator(check_length_description)]
 
 
 class ProjectBase(BaseModel):
@@ -78,8 +69,18 @@ class ProjectResponse(ProjectBase):
 class ProjectTitle(BaseModel):
 	title: LengthTitleField
 
+
 class ProjectDescription(BaseModel):
-	description: LengthDescriptionField
+	description: str
+
+	@field_validator("description")
+	@classmethod
+	def validate_description(cls, value: str) -> str:
+		if len(value) <= MIN_LENGTH_DESCRIPTION:
+			raise ValueError(f"La descripción debe ser mayor a {MIN_LENGTH_DESCRIPTION} caracteres.")
+		if len(value) > MAX_LENGTH_DESCRIPTION:
+			raise ValueError(f"La descripción debe ser menor a {MAX_LENGTH_DESCRIPTION} caracteres.")
+		return value
 
 
 class ProjectSimpleResponse(ProjectBase):
