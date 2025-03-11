@@ -40,3 +40,20 @@ def get_project(id: int) -> schemas.ProjectResponse:
 		)
 
 	return project
+
+
+@router.put(
+	"/{id}/title",
+ 	status_code = status.HTTP_200_OK,
+ 	response_model = schemas.ProjectSimpleResponse,
+ )
+def update_title(id: int, project: schemas.ProjectTitle) -> schemas.ProjectSimpleResponse:
+	try:
+		project = commands.command_update_title_project(project_id = id, infoUpdate = project)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	return project
