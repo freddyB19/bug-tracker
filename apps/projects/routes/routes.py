@@ -60,3 +60,24 @@ def update_project(id: int, project: schemas.ProjectUpdate) -> schemas.ProjectSi
 		)
 
 	return project
+
+
+@router.delete(
+	"/{id}",
+	status_code = status.HTTP_204_NO_CONTENT,
+)
+def delete_project(id: int, project: schemas.ProjectDelete) -> JSONResponse:
+	try:
+		commands.command_delete_project(
+			project_id = id,
+			infoDelete = project
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	return JSONResponse(
+		content={"message": f"Proyecto: con ID '{id}' eliminado con exito."}
+	)
