@@ -1,12 +1,13 @@
 from typing import List
 
-from fastapi import APIRouter
 from fastapi import status
+from fastapi import Depends
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from apps.projects.schemas import schemas
 from apps.projects.commands import commands
-
+from apps.utils.token.token import validate_authorization
 
 router  = APIRouter(prefix = '/project')
 
@@ -15,7 +16,7 @@ router  = APIRouter(prefix = '/project')
  	status_code = status.HTTP_201_CREATED,
  	response_model = schemas.ProjectResponse,
  )
-def create_project(project: schemas.ProjectRequest) -> schemas.ProjectResponse:
+def create_project(project: schemas.ProjectRequest, token: str = Depends(validate_authorization)) -> schemas.ProjectResponse:
 	try:
 		project = commands.command_create_project(project = project)
 	except ValueError as e:
@@ -32,7 +33,7 @@ def create_project(project: schemas.ProjectRequest) -> schemas.ProjectResponse:
  	status_code = status.HTTP_200_OK,
  	response_model = schemas.ProjectResponse,
  )
-def get_project(id: int) -> schemas.ProjectResponse:
+def get_project(id: int, token: str = Depends(validate_authorization)) -> schemas.ProjectResponse:
 	try:
 		project = commands.command_get_project(project_id = id)
 	except ValueError as e:
@@ -49,7 +50,7 @@ def get_project(id: int) -> schemas.ProjectResponse:
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.ProjectSimpleResponse
 )
-def update_project(id: int, project: schemas.ProjectUpdate) -> schemas.ProjectSimpleResponse:
+def update_project(id: int, project: schemas.ProjectUpdate, token: str = Depends(validate_authorization)) -> schemas.ProjectSimpleResponse:
 	try:
 		project = commands.command_update_project(
 			project_id = id,
@@ -68,7 +69,7 @@ def update_project(id: int, project: schemas.ProjectUpdate) -> schemas.ProjectSi
 	"/{id}",
 	status_code = status.HTTP_204_NO_CONTENT,
 )
-def delete_project(id: int, project: schemas.ProjectDelete) -> JSONResponse:
+def delete_project(id: int, project: schemas.ProjectDelete, token: str = Depends(validate_authorization)) -> JSONResponse:
 	try:
 		commands.command_delete_project(
 			project_id = id,
@@ -90,7 +91,7 @@ def delete_project(id: int, project: schemas.ProjectDelete) -> JSONResponse:
 	status_code = status.HTTP_200_OK,
 	response_model = List[schemas.ProjectSimpleResponse]
 )
-def get_project_by_user(user_id: int, page: int = 0, pageSize: int = 10) -> List[schemas.ProjectSimpleResponse]:
+def get_project_by_user(user_id: int, page: int = 0, pageSize: int = 10, token: str = Depends(validate_authorization)) -> List[schemas.ProjectSimpleResponse]:
 
 	try:
 		projects = commands.command_get_projects_user(
