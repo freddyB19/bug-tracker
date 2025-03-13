@@ -11,7 +11,7 @@ from sqlalchemy.orm  import relationship
 from sqlalchemy.orm  import mapped_column
 
 from apps import Model
-
+from apps.tickets.models import Ticket
 
 class ChoicesPrority(enum.Enum):
 	baja = 0
@@ -37,7 +37,7 @@ class Project(Model):
 	)
 
 	user: Mapped['User'] = relationship(back_populates = "projects")
-	tickets: Mapped[List['Ticket']] = relationship(back_populates = "project")
+	tickets: Mapped[List[Ticket]] = relationship(back_populates = "project")
 
 
 	def __repr__(self):
