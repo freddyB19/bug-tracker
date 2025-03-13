@@ -1,4 +1,6 @@
+from typing import List
 from typing import Optional
+
 from datetime import datetime
 from typing_extensions import Annotated
 
@@ -83,3 +85,14 @@ class ProjectSimpleResponse(ProjectBase):
 	updated: datetime
 	description: str | None
 
+class ListProjects(BaseModel):
+	total: int
+	projects: Optional[List[ProjectSimpleResponse]]
+
+
+class ProjectsPagination(BaseModel):
+	previous: str | None
+	next: str | None
+	current: int
+	user: UserResponse
+	content: ListProjects
