@@ -1,5 +1,6 @@
 from typing import List
 
+from sqlalchemy import func
 from sqlalchemy import select
 
 from pydantic import validate_call
@@ -101,3 +102,16 @@ def command_get_projects_user(page: int, pageSize: int, user_id: int) -> List[Pr
 
 	return projects
 
+@validate_call
+def command_get_total_project_user(user_id: int) -> int:
+	db = next(get_db())
+
+	sql = (
+		select(func.count())
+		.select_from(Project)
+		.where(Project.user_id == user_id)
+	)
+
+	total = db.scalar(sql)
+
+	return total
