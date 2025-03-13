@@ -2,11 +2,15 @@ from typing import List
 
 from fastapi import status
 from fastapi import Depends
+from fastapi import Request
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from apps.projects.schemas import schemas
 from apps.projects.commands import commands
+from apps.users.commands import commands as c_users
+
+from apps.utils.pagination import pagination as pg
 from apps.utils.token.token import validate_authorization
 
 router  = APIRouter(prefix = '/project')
@@ -89,20 +93,53 @@ def delete_project(id: int, project: schemas.ProjectDelete, token: str = Depends
 @router.get(
 	"/list/user",
 	status_code = status.HTTP_200_OK,
-	response_model = List[schemas.ProjectSimpleResponse]
+	response_model = schemas.ProjectsPagination
 )
-def get_project_by_user(user_id: int, page: int = 0, pageSize: int = 10, token: str = Depends(validate_authorization)) -> List[schemas.ProjectSimpleResponse]:
+def get_project_by_user(request: Request, user_id: int, page: int = 0, pageSize: int = 10,token: str = Depends(validate_authorization)) -> schemas.ProjectsPagination:
 
 	try:
+		
+		user = c_users.command_get_user(
+			user_id = user_id
+		)
+		
+		total = commands.command_get_total_project_user(
+			user_id = user_id
+		)
+
 		projects = commands.command_get_projects_user(
 			page = page,
 			pageSize = pageSize,
 			user_id = user_id
 		)
+	
 	except ValueError as e:
 		return JSONResponse(
 			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
-	return projects
+
+	pagination = pg.set_url_pagination(
+		request = request,
+		elements = projects,
+		total_elements = total,
+		page = page,
+		pageSize = pageSize,
+		params = {
+			"user_id": user_id
+		}
+	)
+
+	response = {
+		"previous": pagination.get('previous'),
+		"current": page,
+		"next": pagination.get('next'),
+		"user": user,
+		"content": {
+			"total": total,
+			"projects": projects
+		}
+	}
+
+	return response
