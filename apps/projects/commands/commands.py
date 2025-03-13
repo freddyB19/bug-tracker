@@ -90,11 +90,13 @@ def command_delete_project(project_id: int, infoDelete: schemas.ProjectDelete) -
 def command_get_projects_user(page: int, pageSize: int, user_id: int) -> List[Project]:
 	db = next(get_db())
 
+	start = page * pageSize
+
 	sql = (
 		select(Project)
 		.join(User)
 		.where(Project.user_id == user_id)
-		.offset(page)
+		.offset(start)
 		.limit(pageSize)
 	)
 
