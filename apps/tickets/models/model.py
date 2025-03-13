@@ -10,7 +10,12 @@ from sqlalchemy.orm  import relationship
 from sqlalchemy.orm  import mapped_column
 
 from apps import Model
-from apps.projects.models import Project
+
+class ChoicesPrority(enum.Enum):
+	baja = 0
+	normal = 1
+	alta = 2
+	inmediata = 3 
 
 class ChoicesState(enum.Enum):
 	nuevo = 0
@@ -52,7 +57,7 @@ class Ticket(Model):
 		)
 	)
 
-	project: Mapped[Project] = relationship(back_populates = "tickets")
+	project: Mapped['Project'] = relationship(back_populates = "tickets")
 
 	def __repr__(self):
 		return f"Ticket(id={self.id}, title={self.title}, priority={self.priority}, state={self.state}, type={self.type})"
