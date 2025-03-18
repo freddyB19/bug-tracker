@@ -26,3 +26,20 @@ def create_ticket(ticket: schemas.TicketRequest) -> schemas.TicketResponse:
 
 	return new_ticket
 
+@router.get(
+	"/{id}",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.TicketResponse
+)
+def get_ticket(id: int) -> schemas.TicketResponse:
+	try:
+		ticket = commands.command_get_ticket(
+			ticket_id = id
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	return ticket
