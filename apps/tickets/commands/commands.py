@@ -45,3 +45,15 @@ def command_create_ticket(ticket: schemas.TicketRequest) -> Ticket:
 	db.refresh(new_ticket)
 
 	return new_ticket
+
+
+@validate_call
+def command_get_ticket(ticket_id: int) -> Ticket:
+	db = next(get_db())
+
+	ticket = db.get(Ticket, ticket_id)
+
+	if ticket is None:
+		raise ValueError("No existe información sobre este ticket")
+
+	return ticket
