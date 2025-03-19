@@ -1,4 +1,6 @@
+from typing import List
 from typing import Optional
+
 from datetime import datetime
 from typing_extensions import Annotated
 
@@ -99,9 +101,20 @@ class TicketRequest(TicketSchema):
 	type: Optional[TypeField] = ChoicesType.abierto.name
 	description: Optional[LenValidationField] = None
 
+
+class TicketFilter(BaseModel):
+	state: Optional[StateField] = None
+	priority: Optional[PriorityField] = None
+	type: Optional[TypeField] = None
+
+
 class TicketResponse(TicketSchema):
 	id: int
 	created: datetime
 	updated: datetime
 
 	project: ProjectSimpleResponse
+
+
+class ListTicketsResponse(BaseModel):
+	tickets: Optional[List[TicketResponse]]
