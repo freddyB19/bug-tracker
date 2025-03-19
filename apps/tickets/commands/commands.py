@@ -1,3 +1,6 @@
+from typing import List
+from typing import Optional
+
 from sqlalchemy import select
 
 from pydantic import validate_call
@@ -57,3 +60,19 @@ def command_get_ticket(ticket_id: int) -> Ticket:
 		raise ValueError("No existe información sobre este ticket")
 
 	return ticket
+
+@validate_call
+def command_get_ticket_by_filter(ticket: schemas.TicketFilter) -> Optional[List[Ticket]]:
+	db = next(get_db())
+
+	data_search = ticket.model_dump(exclude_defaults = True)
+
+	if not data_search:
+		raise ValueError("Debe incluir parametros de busqueda.")
+
+	tickets = db.query(Ticket).filter_by(
+		**data_search
+	)
+
+	return tickets
+
