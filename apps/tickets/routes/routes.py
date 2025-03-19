@@ -68,3 +68,24 @@ def get_ticket_by_filter(ticket_filter: Annotated[schemas.TicketFilter, Query()]
 	}
 	
 	return response
+
+@router.get(
+	"/search/title",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.ListTicketsResponse
+)
+def get_ticket_by_title(ticket: schemas.TicketByTitle) ->  schemas.ListTicketsResponse:
+	try:
+		tickets = commands.command_get_ticket_by_title(
+			ticket = ticket
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	response = {
+		"tickets": tickets
+	}
+	return response
