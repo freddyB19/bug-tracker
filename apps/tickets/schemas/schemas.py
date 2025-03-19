@@ -41,19 +41,19 @@ def set_choice_type(value: str) -> str:
 	return value
 
 def check_title(value: str) -> str:
-	if value <= MIN_LENGTH_TITLE:
+	if len(value) <= MIN_LENGTH_TITLE:
 		raise ValueError(f"El titulo es demasiado corto, debe ser mayor o igual a {MIN_LENGTH_TITLE} caracteres")
 
-	if value > MAX_LENGTH_TITLE:
+	if len(value) > MAX_LENGTH_TITLE:
 		raise ValueError(f"El titulo es demasiado largo, debe ser menor o igual a {MAX_LENGTH_TITLE} caracteres")
 
 	return value
 
 def check_description(value: str) -> str:
-	if value <= MIN_LENGTH_DESCRIPTION:
+	if len(value) <= MIN_LENGTH_DESCRIPTION:
 		raise ValueError(f"La descripción es demasiado corto, debe ser mayor o igual a {MIN_LENGTH_DESCRIPTION} caracteres")
 
-	if value > MAX_LENGTH_DESCRIPTION:
+	if len(value) > MAX_LENGTH_DESCRIPTION:
 		raise ValueError(f"La descripción  es demasiado largo, debe ser menor o igual a {MAX_LENGTH_DESCRIPTION} caracteres")
 
 	return value
