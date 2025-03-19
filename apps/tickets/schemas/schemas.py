@@ -108,6 +108,9 @@ class TicketFilter(BaseModel):
 	type: Optional[TypeField] = None
 
 
+class TicketByTitle(BaseModel):
+	title: str
+
 class TicketResponse(TicketSchema):
 	id: int
 	created: datetime
