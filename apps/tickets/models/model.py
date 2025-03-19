@@ -20,7 +20,7 @@ class ChoicesPrority(enum.Enum):
 class ChoicesState(enum.Enum):
 	nuevo = 0
 	desarrollo = 1
-	pruba = 2
+	prueba = 2
 	revisión = 3
 	terminado = 4
 
