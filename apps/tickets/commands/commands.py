@@ -76,3 +76,17 @@ def command_get_ticket_by_filter(ticket: schemas.TicketFilter) -> Optional[List[
 
 	return tickets
 
+@validate_call
+def command_get_ticket_by_title(ticket: schemas.TicketByTitle) -> Optional[List[Ticket]]:
+	db = next(get_db())
+
+	sql = (
+		select(Ticket)
+		.where(
+			Ticket.title.ilike(f"%{ticket.title}%")
+		)
+	)
+
+	tickets = db.scalars(sql).all()
+
+	return tickets
