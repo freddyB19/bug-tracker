@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy  import String
 from sqlalchemy  import ForeignKey
 from sqlalchemy.orm  import Mapped 
+from sqlalchemy.orm import DynamicMapped
 from sqlalchemy.orm  import relationship
 from sqlalchemy.orm  import mapped_column
 
@@ -28,6 +29,12 @@ class ChoicesType(enum.Enum):
 	abierto = 0
 	archivado = 1
 	cerrado = 2
+
+class StateTicketHistory(enum.Enum):
+	crear = 0
+	actualizar = 1
+	eliminar = 2
+
 
 class Ticket(Model):
 	__tablename__ = "ticket"
@@ -58,6 +65,31 @@ class Ticket(Model):
 	)
 
 	project: Mapped['Project'] = relationship(back_populates = "tickets")
+	history: DynamicMapped['TicketHistory'] = relationship(back_populates = 'ticket')
 
 	def __repr__(self):
 		return f"Ticket(id={self.id}, title={self.title}, priority={self.priority}, state={self.state}, type={self.type})"
+
+
+class TicketHistory(Model):
+	__tablename__ = "ticket_history"
+	
+	id: Mapped[int] = mapped_column(primary_key = True, index = True, nullable=False, unique=True)
+	created: Mapped[datetime] = mapped_column(insert_default = func.now())
+	message: Mapped[str] = mapped_column(String(250))
+	state: Mapped[Enum] = mapped_column(
+		Enum(StateTicketHistory), 
+		insert_default=StateTicketHistory.crear
+	)
+	ticket_id: Mapped[int] = mapped_column(
+		ForeignKey(
+			'ticket.id',
+			ondelete = "SET NULL",
+			onupdate = "CASCADE"
+		)
+	)
+
+	ticket: Mapped[Ticket] = relationship(back_populates = 'history')
+	
+	def __repr__(self):
+		return f"TicketHistory(id={self.id}, title={self.title}, priority={self.priority}, state={self.state}, type={self.type})"
