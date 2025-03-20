@@ -13,6 +13,7 @@ from apps.projects.schemas.schemas import ProjectSimpleResponse
 from apps.tickets.models import ChoicesType
 from apps.tickets.models import ChoicesState
 from apps.tickets.models import ChoicesPrority
+from apps.utils.pagination import pagination as pg
 
 MIN_LENGTH_TITLE = 5
 MAX_LENGTH_TITLE = 30
@@ -132,6 +133,17 @@ class TicketResponse(TicketSchema):
 class TicketBasicResponse(TicketSchema):
 	id: int
 
+class ListTickets(BaseModel):
+	total: int
+	tickets: Optional[List[TicketBasicResponse]]
+
+class TicketsByProjectResponse(pg.ResponsePagination):
+	project: ProjectSimpleResponse
+	content: ListTickets
+
+class TicketPagination(pg.ListPagination):
+	project_id: int
+
 class TicketSimpleResponse(TicketSchema):
 	id: int
 	created: datetime
@@ -140,3 +152,4 @@ class TicketSimpleResponse(TicketSchema):
 
 class ListTicketsResponse(BaseModel):
 	tickets: Optional[List[TicketResponse]]
+
