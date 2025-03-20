@@ -2,6 +2,8 @@ from typing import List
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy import update
+
 
 from pydantic import validate_call
 
@@ -90,3 +92,45 @@ def command_get_ticket_by_title(ticket: schemas.TicketByTitle) -> Optional[List[
 	tickets = db.scalars(sql).all()
 
 	return tickets
+
+@validate_call
+def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> Ticket:
+	db = next(get_db())
+
+	type_is_valid = utils.validate_choice(
+		choice = infoUpdate.type, 
+		options = ChoicesType
+	)
+	state_is_valid = utils.validate_choice(
+		choice = infoUpdate.state, 
+		options = ChoicesState
+	)
+	priority_is_valid = utils.validate_choice(
+		choice = infoUpdate.priority, 
+		options = ChoicesPrority
+	)
+
+	if infoUpdate.type is not None and not type_is_valid:
+		raise ValueError("El tipo elegido es el incorrecto")
+	if infoUpdate.state is not None and not state_is_valid:
+		raise ValueError("El estado elegido es el incorrecto")
+	if infoUpdate.priority is not None and not priority_is_valid:
+		raise ValueError("La prioridad elegida es la incorrecta")
+
+	update_values = infoUpdate.model_dump(exclude_defaults = True)
+
+	sql = (
+		update(Ticket)
+		.where(Ticket.id == ticket_id)
+		.values(**update_values)
+		.returning(Ticket)
+	)
+
+	ticket = db.execute(sql).scalar_one_or_none()
+	db.close()
+	
+	if ticket is None:
+		raise ValueError("No existe información sobre este ticket")
+
+	return ticket
+
