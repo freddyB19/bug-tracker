@@ -97,24 +97,11 @@ def command_get_ticket_by_title(ticket: schemas.TicketByTitle) -> Optional[List[
 def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> Ticket:
 	db = next(get_db())
 
-	type_is_valid = utils.validate_choice(
-		choice = infoUpdate.type, 
-		options = ChoicesType
-	)
-	state_is_valid = utils.validate_choice(
-		choice = infoUpdate.state, 
-		options = ChoicesState
-	)
-	priority_is_valid = utils.validate_choice(
-		choice = infoUpdate.priority, 
-		options = ChoicesPrority
-	)
-
-	if infoUpdate.type is not None and not type_is_valid:
+	if infoUpdate.type is not None and not utils.validate_choice(choice = infoUpdate.type, options = ChoicesType):
 		raise ValueError("El tipo elegido es el incorrecto")
-	if infoUpdate.state is not None and not state_is_valid:
+	if infoUpdate.state is not None and not utils.validate_choice(choice = infoUpdate.state, options = ChoicesState):
 		raise ValueError("El estado elegido es el incorrecto")
-	if infoUpdate.priority is not None and not priority_is_valid:
+	if infoUpdate.priority is not None and not utils.validate_choice(choice = infoUpdate.priority, options = ChoicesPrority):
 		raise ValueError("La prioridad elegida es la incorrecta")
 
 	update_values = infoUpdate.model_dump(exclude_defaults = True)
@@ -145,4 +132,3 @@ def command_delete_ticket(ticket_id: int) -> None:
 
 	db.delete(ticket)
 	db.commit()
-	
