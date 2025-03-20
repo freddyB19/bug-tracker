@@ -49,7 +49,7 @@ def get_project(id: int, token: str = Depends(validate_authorization)) -> schema
 	return project
 
 
-@router.patch(
+@router.put(
 	"/{id}",
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.ProjectSimpleResponse
