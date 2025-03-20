@@ -134,3 +134,15 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 
 	return ticket
 
+@validate_call
+def command_delete_ticket(ticket_id: int) -> None:
+	db = next(get_db())
+
+	ticket = db.get(Ticket, ticket_id)
+
+	if ticket is None:
+		raise ValueError("No existe información sobre este ticket")
+
+	db.delete(ticket)
+	db.commit()
+	
