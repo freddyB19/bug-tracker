@@ -1,6 +1,7 @@
 from typing import List
 from typing import Optional
 
+from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
 
@@ -132,3 +133,34 @@ def command_delete_ticket(ticket_id: int) -> None:
 
 	db.delete(ticket)
 	db.commit()
+
+@validate_call
+def command_get_tickets_by_project(project_id: int, page: int, pageSize: int) -> List[Ticket]:
+	db = next(get_db())
+
+	start = page * pageSize
+
+	sql = (
+		select(Ticket)
+		.where(Ticket.project_id == project_id)
+		.offset(start)
+		.limit(pageSize)
+	)
+
+	tickets = db.scalars(sql).all()
+
+	return tickets
+
+@validate_call
+def command_get_total_tickets_project(project_id: int) -> int:
+	db = next(get_db())
+	
+	sql = (
+		select(func.count())
+		.select_from(Ticket)
+		.where(Ticket.project_id == project_id)
+	)
+	
+	total = db.scalar(sql)
+	
+	return total
