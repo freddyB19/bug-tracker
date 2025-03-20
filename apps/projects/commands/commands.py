@@ -11,7 +11,6 @@ from apps.projects.models import Project
 from apps.projects.schemas import schemas
 from apps.projects.models import ChoicesPrority
 
-
 from .utils.utils import update_project
 
 CHOICES:list = [choice.name for choice in ChoicesPrority]

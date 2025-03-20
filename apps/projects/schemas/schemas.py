@@ -79,11 +79,13 @@ class ProjectUpdate(BaseModel):
 class ProjectDelete(BaseModel):
 	user_id: int
 
+
 class ProjectSimpleResponse(ProjectBase):
 	id: int
 	created: datetime
 	updated: datetime
 	description: str | None
+
 
 class ListProjects(BaseModel):
 	total: int
