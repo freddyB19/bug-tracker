@@ -129,6 +129,9 @@ class TicketResponse(TicketSchema):
 	project: ProjectSimpleResponse
 
 
+class TicketBasicResponse(TicketSchema):
+	id: int
+
 class TicketSimpleResponse(TicketSchema):
 	id: int
 	created: datetime
