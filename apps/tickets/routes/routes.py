@@ -2,6 +2,7 @@ from typing import Optional
 from typing_extensions import Annotated
 
 from fastapi import status
+from fastapi import Request
 from fastapi import APIRouter
 from fastapi import Query
 from fastapi import Depends
@@ -9,6 +10,9 @@ from fastapi.responses import JSONResponse
 
 from apps.tickets.schemas import schemas
 from apps.tickets.commands import commands
+from apps.projects.commands import commands as c_projects
+
+from apps.utils.pagination import pagination as pg
 from apps.utils.token.token import validate_authorization
 
 
@@ -131,3 +135,55 @@ def delete_ticket(id: int, token: str = Depends(validate_authorization)) -> None
 			content = {"message": str(e)},
 			status_code = status.HTTP_404_NOT_FOUND
 		)
+
+@router.get(
+	"/list/project/",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.TicketsByProjectResponse
+)
+def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagination, Query()]) -> schemas.TicketsByProjectResponse:
+
+	try:
+		project = c_projects.command_get_project(
+			project_id = query.project_id
+		)
+		
+		total_tickets = commands.command_get_total_tickets_project(
+			project_id = query.project_id,
+		)
+		
+		tickets = commands.command_get_tickets_by_project(
+			project_id = query.project_id,
+			page = query.page,
+			pageSize = query.pageSize,
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+
+	pagination = pg.set_url_pagination(
+		request = request,
+		elements = tickets,
+		total_elements = total_tickets,
+		page = query.page,
+		pageSize = query.pageSize,
+		params = {
+			"project_id": query.project_id
+		}
+	)
+
+	response = {
+		"previous": pagination.get("previous"),
+		"current": query.page,
+		"next": pagination.get("next"),
+		"project": project,
+		"content": {
+			"total": total_tickets,
+			"tickets": tickets
+		}
+	}
+
+	return response
