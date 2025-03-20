@@ -89,3 +89,23 @@ def get_ticket_by_title(ticket: schemas.TicketByTitle) ->  schemas.ListTicketsRe
 		"tickets": tickets
 	}
 	return response
+
+
+@router.put(
+	"/{id}",
+	status_code = status.HTTP_200_OK,
+	response_model = schemas.TicketSimpleResponse
+)
+def update_ticket(id: int, ticket: schemas.TicketUpdate) -> schemas.TicketSimpleResponse:
+	try:
+		ticket = commands.command_update_ticket(
+			ticket_id = id,
+			infoUpdate = ticket
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
+
+	return ticket
