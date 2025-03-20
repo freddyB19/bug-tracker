@@ -1,10 +1,10 @@
+from typing import Optional
 from typing_extensions import Annotated
 
 from fastapi import status
 from fastapi import APIRouter
 from fastapi import Query
 from fastapi.responses import JSONResponse
-
 
 from apps.tickets.schemas import schemas
 from apps.tickets.commands import commands
@@ -29,6 +29,7 @@ def create_ticket(ticket: schemas.TicketRequest) -> schemas.TicketResponse:
 
 	return new_ticket
 
+
 @router.get(
 	"/{id}",
 	status_code = status.HTTP_200_OK,
@@ -46,6 +47,7 @@ def get_ticket(id: int) -> schemas.TicketResponse:
 		)
 
 	return ticket
+
 
 @router.get(
 	"/search/",
@@ -68,6 +70,7 @@ def get_ticket_by_filter(ticket_filter: Annotated[schemas.TicketFilter, Query()]
 	}
 	
 	return response
+
 
 @router.get(
 	"/search/title",
@@ -109,3 +112,19 @@ def update_ticket(id: int, ticket: schemas.TicketUpdate) -> schemas.TicketSimple
 		)
 
 	return ticket
+
+
+@router.delete(
+	"/{id}",
+	status_code = status.HTTP_204_NO_CONTENT,
+)
+def delete_ticket(id: int) -> None:
+	try:
+		commands.command_delete_ticket(
+			ticket_id = id
+		)
+	except ValueError as e:
+		return JSONResponse(
+			content = {"message": str(e)},
+			status_code = status.HTTP_404_NOT_FOUND
+		)
