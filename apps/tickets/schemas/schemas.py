@@ -112,6 +112,15 @@ class TicketFilter(BaseModel):
 class TicketByTitle(BaseModel):
 	title: str
 
+
+class TicketUpdate(BaseModel):
+	title: Optional[LenValidationField] = None
+	description: Optional[LenValidationField] = None
+	type: Optional[TypeField] = None
+	state: Optional[str] = None
+	priority: Optional[PriorityField] = None
+
+
 class TicketResponse(TicketSchema):
 	id: int
 	created: datetime
@@ -119,6 +128,12 @@ class TicketResponse(TicketSchema):
 
 	project: ProjectSimpleResponse
 
+
+class TicketSimpleResponse(TicketSchema):
+	id: int
+	created: datetime
+	updated: datetime
+	project_id: int
 
 class ListTicketsResponse(BaseModel):
 	tickets: Optional[List[TicketResponse]]
