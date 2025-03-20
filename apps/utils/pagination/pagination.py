@@ -5,13 +5,24 @@ from typing import Optional
 from typing_extensions import Annotated
 
 from fastapi import Request
+
+from pydantic import Field
+from pydantic import BaseModel
 from pydantic import validate_call
 
-from apps.projects.models import Project
+
+ListElements = Optional[List[Any]]
 
 
-ListProjects = Optional[List[Annotated[Any, Project]]]
+class ListPagination(BaseModel):
+	page: int = Field(ge = 0, default = 0)
+	pageSize: int = Field(ge = 1, le = 20, default = 10) #10
 
+
+class ResponsePagination(BaseModel):
+	previous: str | None
+	next: str | None
+	current: int
 
 @validate_call
 def add_params_to_url(url_next: str, url_previous: str, params: Optional[Dict[str, int]] = None) -> Dict[str, str]:
@@ -28,7 +39,7 @@ def add_params_to_url(url_next: str, url_previous: str, params: Optional[Dict[st
 	}
 
 @validate_call
-def set_url_pagination(request: Annotated[Any, Request], elements: ListProjects, total_elements: int, page: int, pageSize: int, params: Optional[Dict[str, int]] = None) -> Dict[str, str]:
+def set_url_pagination(request: Annotated[Any, Request], elements: ListElements, total_elements: int, page: int, pageSize: int, params: Optional[Dict[str, int]] = None) -> Dict[str, str]:
 	url = f"{request.base_url}{request.url.path[1:]}"
 
 	elements_per_page = page + pageSize
