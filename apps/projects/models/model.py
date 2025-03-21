@@ -28,7 +28,7 @@ class Project(Model):
 	description: Mapped[str] = mapped_column(String(200))
 	created: Mapped[datetime] = mapped_column(insert_default = func.now())
 	updated: Mapped[datetime] = mapped_column(insert_default = func.now(), onupdate=func.now())
-	user_id: Mapped[int] = mapped_column(
+	user_id: Mapped[int | None] = mapped_column(
 		ForeignKey(
 			'user.id',
 			ondelete = 'CASCADE',
