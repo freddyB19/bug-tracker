@@ -10,6 +10,8 @@ from fastapi.responses import JSONResponse
 
 from apps.tickets.schemas import schemas
 from apps.tickets.commands import commands
+from apps.tickets.models import StateTicketHistory
+
 from apps.projects.commands import commands as c_projects
 
 from apps.utils.pagination import pagination as pg
@@ -27,6 +29,11 @@ def create_ticket(ticket: schemas.TicketRequest, token: str = Depends(validate_a
 	try:
 		new_ticket = commands.command_create_ticket(
 			ticket = ticket
+		)
+
+		commands.command_add_history_ticket(
+			ticket_id = new_ticket.id, 
+			state = StateTicketHistory.crear.name
 		)
 	except ValueError as e:
 		return JSONResponse(
@@ -108,10 +115,19 @@ def get_ticket_by_title(ticket: schemas.TicketByTitle, token: str = Depends(vali
 )
 def update_ticket(id: int, ticket: schemas.TicketUpdate, token: str = Depends(validate_authorization)) -> schemas.TicketSimpleResponse:
 	try:
+		ticket_update = ticket.model_dump(exclude_defaults = True)
+
 		ticket = commands.command_update_ticket(
 			ticket_id = id,
 			infoUpdate = ticket
 		)
+		
+		commands.command_add_history_ticket(
+			ticket_id = id, 
+			state = StateTicketHistory.actualizar.name,
+			infoTicket = ticket_update
+		)
+
 	except ValueError as e:
 		return JSONResponse(
 			content = {"message": str(e)},
