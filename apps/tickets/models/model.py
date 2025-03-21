@@ -55,7 +55,7 @@ class Ticket(Model):
 		Enum(ChoicesType), 
 		insert_default=ChoicesType.abierto
 	)
-	project_id: Mapped[int] = mapped_column(
+	project_id: Mapped[int | None] = mapped_column(
 		ForeignKey(
 			'project.id',
 			ondelete = "CASCADE",
