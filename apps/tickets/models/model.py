@@ -33,7 +33,6 @@ class ChoicesType(enum.Enum):
 class StateTicketHistory(enum.Enum):
 	crear = 0
 	actualizar = 1
-	eliminar = 2
 
 
 class Ticket(Model):
@@ -81,10 +80,10 @@ class TicketHistory(Model):
 		Enum(StateTicketHistory), 
 		insert_default=StateTicketHistory.crear
 	)
-	ticket_id: Mapped[int] = mapped_column(
+	ticket_id: Mapped[int | None] = mapped_column(
 		ForeignKey(
 			'ticket.id',
-			ondelete = "SET NULL",
+			ondelete = "CASCADE",
 			onupdate = "CASCADE"
 		)
 	)
