@@ -23,9 +23,9 @@ router = APIRouter(prefix = "/ticket")
 @router.post(
 	"/",
 	status_code = status.HTTP_201_CREATED,
-	response_model = schemas.TicketResponse
+	response_model = schemas.TicketSimpleResponse
 )
-def create_ticket(ticket: schemas.TicketRequest, token: str = Depends(validate_authorization)) -> schemas.TicketResponse:
+def create_ticket(ticket: schemas.TicketRequest, token: str = Depends(validate_authorization)) -> schemas.TicketSimpleResponse:
 	try:
 		new_ticket = commands.command_create_ticket(
 			ticket = ticket
@@ -64,14 +64,15 @@ def get_ticket(id: int, token: str = Depends(validate_authorization)) -> schemas
 
 
 @router.get(
-	"/search/",
+	"/project/{project_id}/search",
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.ListTicketsResponse
 )
-def get_ticket_by_filter(ticket_filter: Annotated[schemas.TicketFilter, Query()], token: str = Depends(validate_authorization)) -> schemas.ListTicketsResponse:
+def get_ticket_by_filter(project_id: int, ticket_filter: Annotated[schemas.TicketFilter, Query()], token: str = Depends(validate_authorization)) -> schemas.ListTicketsResponse:
 	try:
 		tickets = commands.command_get_ticket_by_filter(
-			ticket = ticket_filter
+			ticket = ticket_filter,
+			project_id = project_id
 		)
 	except ValueError as e:
 		return JSONResponse(
