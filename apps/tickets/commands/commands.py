@@ -92,10 +92,13 @@ def command_get_ticket(ticket_id: int) -> Ticket:
 	return ticket
 
 @validate_call
-def command_get_ticket_by_filter(ticket: schemas.TicketFilter) -> Optional[List[Ticket]]:
+def command_get_ticket_by_filter(project_id: int, ticket: schemas.TicketFilter) -> Optional[List[Ticket]]:
 	db = next(get_db())
 
 	data_search = ticket.model_dump(exclude_defaults = True)
+	data_search.update({
+		"project_id": project_id
+	})
 
 	if not data_search:
 		raise ValueError("Debe incluir parametros de busqueda.")
