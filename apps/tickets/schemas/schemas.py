@@ -129,6 +129,13 @@ class TicketResponse(TicketSchema):
 
 	project: ProjectSimpleResponse
 
+class TicketSimpleResponse(TicketSchema):
+	id: int
+	created: datetime
+	updated: datetime
+
+	project_id: int
+
 
 class TicketBasicResponse(TicketSchema):
 	id: int
