@@ -1,22 +1,49 @@
 from typing import List
+from typing import Dict
+from typing import Literal
 from typing import Optional
 
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
 
-
 from pydantic import validate_call
 
 from apps import get_db
 from .utils import utils
 from apps.tickets.models import Ticket
+from apps.tickets.models import TicketHistory
 from apps.tickets.models import ChoicesType
 from apps.tickets.models import ChoicesState
 from apps.tickets.models import ChoicesPrority
+from apps.tickets.models import StateTicketHistory 
 
 from apps.tickets.schemas import schemas
 from apps.projects.models.model import Project
+
+
+@validate_call
+def command_add_history_ticket(ticket_id: int, state: str, infoTicket: Dict[str, str | int ] = None) -> TicketHistory:
+	db = next(get_db())
+
+	if not utils.validate_choice(choice = state, options = StateTicketHistory):
+		raise ValueError(f"TicketHistory: 'state' invalido = {state}")
+
+	new_history = TicketHistory(
+		ticket_id = ticket_id,
+		state = state,
+		message = utils.set_message_ticket_history(
+			ticket_id = ticket_id, 
+			state = state, 
+			data = infoTicket
+		)
+	)
+
+	db.add(new_history)
+	db.commit()
+	db.refresh(new_history)
+
+	return new_history
 
 
 @validate_call
