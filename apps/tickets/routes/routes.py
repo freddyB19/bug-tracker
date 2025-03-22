@@ -121,9 +121,9 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 @router.get(
 	"/search/title",
 	status_code = status.HTTP_200_OK,
-	response_model = schemas.ListTicketsResponse
+	response_model = schemas.TicketSimpleResponse
 )
-def get_ticket_by_title(ticket: schemas.TicketByTitle, token: str = Depends(validate_authorization)) ->  schemas.ListTicketsResponse:
+def get_ticket_by_title(ticket: schemas.TicketByTitle, token: str = Depends(validate_authorization)) ->  schemas.TicketSimpleResponse:
 	try:
 		tickets = commands.command_get_ticket_by_title(
 			ticket = ticket
