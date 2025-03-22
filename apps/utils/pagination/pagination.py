@@ -33,7 +33,7 @@ def add_params_to_url(params: Optional[Dict[str, int | str]] = None) -> Dict[str
 			url += f"&{var}={value}"
 	
 	return {
-		"url": url[1:] if url else ""
+		"url": url
 	}
 
 @validate_call
@@ -42,8 +42,8 @@ def set_url_pagination(request: Annotated[Any, Request], elements: ListElements,
 
 	url_params = add_params_to_url(params = params)
 
-	url_next = f"{url_base}?{url_params['url']}&page={page + 1}&pageSize={pageSize}"
-	url_previous = f"{url_base}?{url_params['url']}&page={page - 1}&pageSize={pageSize}"
+	url_next = f"{url_base}?page={page + 1}&pageSize={pageSize}{url_params['url']}"
+	url_previous = f"{url_base}?page={page - 1}&pageSize={pageSize}{url_params['url']}"
 
 	elements_per_page = page + pageSize
 
