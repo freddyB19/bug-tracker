@@ -110,6 +110,10 @@ class TicketFilter(BaseModel):
 	type: Optional[TypeField] = None
 
 
+class TicketFilterPagination(pg.ListPagination, TicketFilter):
+	pass
+
+
 class TicketByTitle(BaseModel):
 	title: str
 
