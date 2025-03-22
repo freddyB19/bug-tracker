@@ -144,19 +144,47 @@ class TicketSimpleResponse(TicketSchema):
 class TicketBasicResponse(TicketSchema):
 	id: int
 
+
 class ListTickets(BaseModel):
 	total: int
 	tickets: Optional[List[TicketBasicResponse]]
+
 
 class TicketsByProjectResponse(pg.ResponsePagination):
 	project: ProjectSimpleResponse
 	content: ListTickets
 
+
 class TicketPagination(pg.ListPagination):
 	project_id: int
+
 
 class TicketSimpleResponse(TicketSchema):
 	id: int
 	created: datetime
 	updated: datetime
 	project_id: int
+
+
+class TicketsHistorySchema(BaseModel):
+	id: int
+	created: datetime
+	message: str
+	state: str
+
+
+class TicketsHistorySimpleResponse(TicketsHistorySchema):
+	ticket_id: int
+
+
+class TicketsHistoryResponse(TicketsHistorySchema):
+	ticket: TicketBasicResponse
+
+
+class ListTicketsHistory(BaseModel):
+	total: int
+	histories: Optional[List[TicketsHistorySimpleResponse]]
+
+class TicketsHistoryByTicketResponse(pg.ResponsePagination):
+	ticket: TicketBasicResponse
+	content: ListTicketsHistory
