@@ -25,35 +25,29 @@ class ResponsePagination(BaseModel):
 	current: int
 
 @validate_call
-def add_params_to_url(url_next: str, url_previous: str, params: Optional[Dict[str, int]] = None) -> Dict[str, str]:
-
+def add_params_to_url(params: Optional[Dict[str, int | str]] = None) -> Dict[str, str]:
+	url = ""
 
 	if params:
 		for var, value in params.items():
-			url_previous += f"&{var}={value}"
-			url_next += f"&{var}={value}"
-
+			url += f"&{var}={value}"
+	
 	return {
-		"url_previous": url_previous,
-		"url_next": url_next
+		"url": url[1:] if url else ""
 	}
 
 @validate_call
-def set_url_pagination(request: Annotated[Any, Request], elements: ListElements, total_elements: int, page: int, pageSize: int, params: Optional[Dict[str, int]] = None) -> Dict[str, str]:
-	url = f"{request.base_url}{request.url.path[1:]}"
+def set_url_pagination(request: Annotated[Any, Request], elements: ListElements, total_elements: int, page: int, pageSize: int, params: Optional[Dict[str, int | str]] = None) -> Dict[str, str]:
+	url_base = f"{request.base_url}{request.url.path[1:]}"
+
+	url_params = add_params_to_url(params = params)
+
+	url_next = f"{url_base}?{url_params['url']}&page={page + 1}&pageSize={pageSize}"
+	url_previous = f"{url_base}?{url_params['url']}&page={page - 1}&pageSize={pageSize}"
 
 	elements_per_page = page + pageSize
 
-	url_previous = f"{url}?page={page - 1}&pageSize={pageSize}"
-	url_next = f"{url}?page={page + 1}&pageSize={pageSize}"
-
-	urls = add_params_to_url(
-		params = params,
-		url_next = url_next,
-		url_previous = url_previous
-	)
-
 	return {
-		"previous": urls["url_previous"] if (page >= 1 ) and elements else None,
-		"next": urls["url_next"] if (elements_per_page < total_elements) and elements else None,
+		"previous": url_previous if (page >= 1 ) and elements else None,
+		"next": url_next if (elements_per_page < total_elements) and elements else None,
 	}
