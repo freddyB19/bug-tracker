@@ -66,12 +66,23 @@ def get_ticket(id: int, token: str = Depends(validate_authorization)) -> schemas
 @router.get(
 	"/project/{project_id}/search",
 	status_code = status.HTTP_200_OK,
-	response_model = schemas.ListTicketsResponse
+	response_model = schemas.TicketsByProjectResponse
 )
-def get_ticket_by_filter(project_id: int, ticket_filter: Annotated[schemas.TicketFilter, Query()], token: str = Depends(validate_authorization)) -> schemas.ListTicketsResponse:
+def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annotated[schemas.TicketFilterPagination, Query()], token: str = Depends(validate_authorization)) -> schemas.TicketsByProjectResponse:
+	
 	try:
+
+		project = c_projects.command_get_project(
+			project_id = project_id
+		)
+
+		total_tickets = commands.command_get_total_tickets_filter(
+			infoFilter = ticket_filter,
+			project_id = project_id
+		)
+		
 		tickets = commands.command_get_ticket_by_filter(
-			ticket = ticket_filter,
+			infoFilter = ticket_filter,
 			project_id = project_id
 		)
 	except ValueError as e:
@@ -80,8 +91,28 @@ def get_ticket_by_filter(project_id: int, ticket_filter: Annotated[schemas.Ticke
 			status_code = status.HTTP_404_NOT_FOUND
 		)
 
+	search = ticket_filter.model_dump(
+		exclude_defaults = True, 
+		exclude=['page', 'pageSize']
+	)
+	pagination = pg.set_url_pagination(
+		request = request,
+		elements = tickets,
+		total_elements = total_tickets,
+		page = ticket_filter.page,
+		pageSize = ticket_filter.pageSize,
+		params = search 
+	)
+
 	response = {
-		"tickets": tickets
+		"previous": pagination.get('previous'),
+		"current": ticket_filter.page,
+		"next": pagination.get("next"),
+		"project": project,
+		"content": {
+			"total": total_tickets,
+			"tickets": tickets
+		}	
 	}
 	
 	return response
