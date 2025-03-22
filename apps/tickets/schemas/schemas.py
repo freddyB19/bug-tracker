@@ -160,7 +160,3 @@ class TicketSimpleResponse(TicketSchema):
 	created: datetime
 	updated: datetime
 	project_id: int
-
-class ListTicketsResponse(BaseModel):
-	tickets: Optional[List[TicketResponse]]
-
