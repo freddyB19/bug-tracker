@@ -169,7 +169,7 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 	db.commit()
 	db.refresh(ticket)
 	db.close()
-	
+
 	return ticket
 
 @validate_call
@@ -216,3 +216,34 @@ def command_get_total_tickets_project(project_id: int) -> int:
 	return total
 
 
+@validate_call
+def command_get_total_tickets_history(ticket_id: int) -> int:
+	db = next(get_db())
+
+	sql = (
+		select(func.count())
+		.select_from(TicketHistory)
+		.where(TicketHistory.ticket_id == ticket_id)
+	)
+
+	total = db.scalar(sql)
+
+	return total
+
+
+@validate_call
+def command_get_tickets_history(ticket_id: int, page: int, pageSize: int) -> Optional[TicketHistory]:
+	db = next(get_db())
+
+	start = page * pageSize
+
+	sql = (
+		select(TicketHistory)
+		.where(TicketHistory.ticket_id == ticket_id)
+		.offset(start)
+		.limit(pageSize)
+	)
+
+	histories = db.scalars(sql).all()
+
+	return histories
