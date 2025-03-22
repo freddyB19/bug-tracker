@@ -162,11 +162,14 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 	)
 
 	ticket = db.execute(sql).scalar_one_or_none()
-	db.close()
-	
+
 	if ticket is None:
 		raise ValueError("No existe información sobre este ticket")
-
+	
+	db.commit()
+	db.refresh(ticket)
+	db.close()
+	
 	return ticket
 
 @validate_call
@@ -211,3 +214,5 @@ def command_get_total_tickets_project(project_id: int) -> int:
 	total = db.scalar(sql)
 	
 	return total
+
+
