@@ -7,7 +7,6 @@ from sqlalchemy import select
 
 from pydantic import validate_call
 
-
 from apps import get_db
 from apps.users.schemas import schemas
 from apps.users.models import User
@@ -97,8 +96,6 @@ def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> Us
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
 		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
-	
-
 	user.email = infoUpdate.email
 
 	db.commit()
@@ -136,13 +133,14 @@ def command_update_username_user(user_id: int, infoUpdate: schemas.UserUsername)
 	if user.username == infoUpdate.username:
 		raise ValueError("Tu nuevo nombre de usuario debe ser diferente al que posees actualmente.")
 
-	sql = (
-		select(User)
-		.where(User.username == infoUpdate.username)
-	)
-
-	if db.scalar(sql) is not None:
+	if db.query(User).filter(User.username == infoUpdate.username).one_or_none() is not None:
 		raise ValueError(f"Ya existe un usuario con ese username: '{infoUpdate.username}'")
+
+	passwordHashed = user.password
+	passwordPlainText = infoUpdate.password
+
+	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
+		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
 	user.username = infoUpdate.username
 
@@ -150,8 +148,6 @@ def command_update_username_user(user_id: int, infoUpdate: schemas.UserUsername)
 	db.refresh(user)
 
 	return user
-
-
 
 
 @validate_call
