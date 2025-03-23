@@ -45,7 +45,14 @@ def command_create_project(project: schemas.ProjectRequest) -> Project:
 @validate_call
 def command_get_project(project_id: int) -> Project:
 	db = next(get_db())
-	project = db.get(Project, project_id)
+
+	sql = (
+		select(Project)
+		.join(User)
+		.where(Project.id == project_id)
+	)
+
+	project = db.scalar(sql)
 
 	if project is None:
 		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
@@ -71,7 +78,7 @@ def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -
 		.returning(Project)
 	)
 
-	project = db.scalar(sql) #.scalar_one_or_none()
+	project = db.scalar(sql)
 
 	db.commit()
 	db.refresh(project)
