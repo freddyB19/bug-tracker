@@ -81,13 +81,8 @@ def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> Us
 
 	if user is None:
 		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
-	
-	sql = (
-		select(User)
-		.where(User.email == infoUpdate.email)
-	)
 
-	if db.scalar(sql) is not None:
+	if db.query(User).filter(User.email == infoUpdate.email).one_or_none() is not None:
 		raise ValueError(f"Ya existe un usuario con ese email: '{infoUpdate.email}'")
 
 	passwordHashed = user.password
