@@ -2,6 +2,8 @@ from typing import List
 
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy import update
+
 
 from pydantic import validate_call
 
@@ -55,19 +57,26 @@ def command_get_project(project_id: int) -> Project:
 def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -> Project:
 	db = next(get_db())
 
-	project = db.get(Project, project_id)
+	user = infoUpdate.model_dump(include = ['user_id'])
+	values = infoUpdate.model_dump(exclude_defaults = True, exclude = ['user_id'])
 
-	if project is None:
-		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
+	if db.query(Project).filter(Project.id == project_id, Project.user_id == user['user_id']).one_or_none() is None:
+		raise ValueError(f"No existe información sobre este proyecto o no le pertenece a este usuario.'{project_id}'")
 
-	if project.user_id != infoUpdate.user_id:
-		raise ValueError(f"El usuario no es dueño de este proyecto.")
+	sql = (
+		update(Project)
+		.where(Project.id == project_id)
+		.where(Project.user_id == user['user_id'])
+		.values(**values)
+		.returning(Project)
+	)
 
-	update_project(project = project, infoUpdate = infoUpdate)
-	
+	project = db.scalar(sql) #.scalar_one_or_none()
+
 	db.commit()
 	db.refresh(project)
 	
+	db.close()
 	return project
 
 @validate_call
