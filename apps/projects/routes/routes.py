@@ -94,6 +94,8 @@ def delete_project(id: int, project: schemas.ProjectDelete, token: str = Depends
 	)
 
 
+#TODO:
+# Cambiar la ruta url de este endpoint
 @router.get(
 	"/list/user",
 	status_code = status.HTTP_200_OK,
