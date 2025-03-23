@@ -38,7 +38,7 @@ def create_user(user: schemas.UserRequest) -> schemas.UserResponse:
 	response_model = schemas.UserResponse, 
 	status_code = status.HTTP_200_OK
 )
-def get_user(id: int) -> schemas.UserResponse:
+def get_user(id: int, token: str = Depends(validate_authorization)) -> schemas.UserResponse:
 
 	try:
 		user = commands.command_get_user(user_id = id)
