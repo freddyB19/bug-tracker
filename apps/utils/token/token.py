@@ -44,7 +44,7 @@ class VerifyTokenResult(BaseModel):
 
 def is_empty(value: Dict[str, Any]) ->  Dict[str, Any]:
 	if not value:
-		raise ValueError("El diccionario esta vacio")
+		raise ValueError("No se creará un token a partir de un diccionario vacío")
 
 	return value
 
@@ -167,3 +167,38 @@ def validate_authorization(authorization: Annotated[str | None, Header()] = None
 			)
 
 	return token
+
+
+class TokenDecode:
+
+	@classmethod
+	@validate_call
+	def main(cls, token: str) -> DecodeTokenResult:
+		try:
+			return decode_token(token = token)
+		except ValidationError as e:
+			raise ValueError("El token debe ser siempre un 'str' ")
+
+class TokenCreate:
+
+	@classmethod
+	@validate_call
+	def main(cls, data: Dict[str, Any]) -> str:
+		try:
+			return create_token(infoDict = data)
+		except ValidationError as e:
+			raise ValueError("La información del token debe estar almacenada en un diccionario.")
+		except ValueError as e:
+			raise ValueError(f"Error de token: {e}")
+
+class TokenRefresh:
+
+	@classmethod
+	@validate_call
+	def main(cls, data: Dict[str, Any]) -> str:
+		try:
+			return create_refresh_token(infoDict = data)
+		except ValidationError as e:
+			raise ValueError("La información del token debe estar almacenada en un diccionario.")
+		except ValueError as e:
+			raise ValueError(f"Error de token: {e}")
