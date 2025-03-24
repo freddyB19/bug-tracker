@@ -18,6 +18,10 @@ from apps.utils.token.token import verify_token
 from apps.utils.token.token import decode_token
 from apps.utils.token.token import create_refresh_token
 
+from apps.utils.token.token import TokenDecode
+from apps.utils.token.token import TokenCreate
+from apps.utils.token.token import TokenRefresh
+
 
 @validate_call
 def command_create_user(user: schemas.UserRequest)-> User:
@@ -168,8 +172,8 @@ def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
 	if user is None:
 		raise ValueError("Ha ocurrido un error interno al momento de serializar User")
 	
-	token = create_token(infoDict = user)
-	refresh_token = create_refresh_token(infoDict = user)
+	token = TokenCreate.main(data = user)
+	refresh_token = TokenRefresh.main(data = user)
 
 	user.update({
 		'auth': {
@@ -182,17 +186,20 @@ def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
 
 
 @validate_call
-def command_refresh_token(token: str)-> Dict[str, str]:
+def command_refresh_token(token: str)-> Dict[str, str | bool]:
 	token_validation = verify_token(token)
 
-	if not token_validation.get("state"):
-		return token_validation
+	if not token_validation.state:
+		return token_validation.model_dump()
 
-	user = decode_token(token)
+	user = TokenDecode.main(token = token)
+
+	if not user.state:
+		return user.model_dump()
+
+	token = TokenCreate.main(data = user.data)
+	refresh_token = TokenRefresh.main(data = user.data)
 	
-	token = create_token(infoDict = user)
-	refresh_token = create_refresh_token(infoDict = user)
-
 	tokens =  {
 		'auth': {
 			"token": token,
