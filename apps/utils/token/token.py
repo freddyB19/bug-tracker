@@ -9,6 +9,7 @@ from fastapi import status
 from fastapi import Header
 from fastapi import HTTPException
 
+from pydantic import validate_call
 
 from apps import (
 	SECRET_KEY,
@@ -80,8 +81,17 @@ def create_refresh_token(infoDict: Dict):
 def decode_token(token: str) -> Dict[str, str | int]:
 	return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM_JWT])
 
-def extract_token(auth: str) -> str:
-	return auth.lstrip("Bearer").strip(" ")
+@validate_call
+def extract_token_from_str(auth: str) -> str:
+	find = "Bearer "
+	
+	if not isinstance(auth, str):
+		raise ValueError("El dato recibido no es una cadena de texto")
+
+	if not auth.startswith(find):
+		raise ValueError("Error en el formato de envio del token")
+	
+	return auth.replace(find, "").strip(" ")
 
 
 def validate_authorization(authorization: Annotated[str | None, Header()] = None) -> str:
@@ -91,7 +101,7 @@ def validate_authorization(authorization: Annotated[str | None, Header()] = None
 				detail = "Ausencia del token en la cabecera.",
 				headers={"WWW-Authenticate": "Bearer"},
 			)
-	token = extract_token(auth = authorization)
+	token = extract_token_from_str(auth = authorization)
 	
 	result = verify_token(token = token)
 
