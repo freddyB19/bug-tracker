@@ -4,11 +4,10 @@ from typing import Dict
 from typing import Optional
 from typing_extensions import Annotated
 
-from fastapi import Request
-
 from pydantic import Field
 from pydantic import BaseModel
 from pydantic import validate_call
+from pydantic import ConfigDict
 
 
 ListElements = Optional[List[Any]]
@@ -24,7 +23,14 @@ class ResponsePagination(BaseModel):
 	next: str | None
 	current: int
 
-@validate_call
+
+# Sirve para validar el parametro request en 'set_url_pagination'
+class RequestContext(BaseModel):
+	base_url: str = Field(min_length = 5)
+	path: str = Field(min_length = 5)
+
+
+@validate_call(config = ConfigDict(hide_input_in_errors=True))
 def add_params_to_url(params: Optional[Dict[str, int | str]] = None) -> Dict[str, str]:
 	url = ""
 
@@ -36,11 +42,11 @@ def add_params_to_url(params: Optional[Dict[str, int | str]] = None) -> Dict[str
 		"url": url
 	}
 
-@validate_call
-def set_url_pagination(request: Annotated[Any, Request], elements: ListElements, total_elements: int, page: int, pageSize: int, params: Optional[Dict[str, int | str]] = None) -> Dict[str, str]:
-	url_base = f"{request.base_url}{request.url.path[1:]}"
-
+@validate_call(config = ConfigDict(hide_input_in_errors=True))
+def set_url_pagination(request: RequestContext, elements: ListElements, total_elements: int, page: int, pageSize: int, params: Optional[Dict[str, int | str]] = None) -> Dict[str, str]:
 	url_params = add_params_to_url(params = params)
+
+	url_base = f"{request.base_url}{request.path}"
 
 	url_next = f"{url_base}?page={page + 1}&pageSize={pageSize}{url_params['url']}"
 	url_previous = f"{url_base}?page={page - 1}&pageSize={pageSize}{url_params['url']}"
