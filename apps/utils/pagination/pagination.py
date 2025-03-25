@@ -8,10 +8,12 @@ from pydantic import Field
 from pydantic import BaseModel
 from pydantic import validate_call
 from pydantic import ConfigDict
+from pydantic import PlainSerializer
+
+from fastapi import Request
 
 
 ListElements = Optional[List[Any]]
-
 
 class ListPagination(BaseModel):
 	page: int = Field(ge = 0, default = 0)
@@ -57,3 +59,13 @@ def set_url_pagination(request: RequestContext, elements: ListElements, total_el
 		"previous": url_previous if (page >= 1 ) and elements else None,
 		"next": url_next if (elements_per_page < total_elements) and elements else None,
 	}
+
+
+@validate_call(config = ConfigDict(hide_input_in_errors=True))
+def get_url_from_request(request: Annotated[Any, Request]) -> Dict[str, str]:
+	
+	if not isinstance(request, Request):
+		raise ValueError("el objecto debe ser de tipo 'Request'")
+
+	return {"base_url": str(request.base_url), "path": request.url.path[1:]}
+
