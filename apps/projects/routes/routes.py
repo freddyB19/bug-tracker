@@ -118,7 +118,7 @@ def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagin
 			pageSize = query.pageSize,
 			user_id = query.user_id
 		)
-	
+
 	except ValueError as e:
 		return JSONResponse(
 			content = {"message": str(e)},
@@ -127,7 +127,7 @@ def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagin
 
 
 	pagination = pg.set_url_pagination(
-		request = request,
+		request = pg.get_url_from_request(request = request),
 		elements = projects,
 		total_elements = total,
 		page = query.page,

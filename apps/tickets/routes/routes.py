@@ -95,8 +95,9 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 		exclude_defaults = True, 
 		exclude=['page', 'pageSize']
 	)
+	
 	pagination = pg.set_url_pagination(
-		request = request,
+		request =  pg.get_url_from_request(request = request),
 		elements = tickets,
 		total_elements = total_tickets,
 		page = ticket_filter.page,
@@ -213,7 +214,7 @@ def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagi
 
 
 	pagination = pg.set_url_pagination(
-		request = request,
+		request = pg.get_url_from_request(request = request),
 		elements = tickets,
 		total_elements = total_tickets,
 		page = query.page,
@@ -222,6 +223,7 @@ def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagi
 			"project_id": query.project_id
 		}
 	)
+
 
 	response = {
 		"previous": pagination.get("previous"),
@@ -265,7 +267,7 @@ def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.
 
 
 	pagination = pg.set_url_pagination(
-		request = request,
+		request = pg.get_url_from_request(request = request),
 		elements = histories,
 		total_elements = total_tickets_history,
 		page = query.page,
