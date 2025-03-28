@@ -1,16 +1,7 @@
-import os
-import sys
-from unittest.mock import patch 
-
 import jwt
 import pytest
 
-
 from pydantic import ValidationError
-
-BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(BASE)
-sys.path.append(os.path.join(BASE, "apps"))
 
 from apps.utils.token.token import create_token
 from apps.utils.token.token import decode_token

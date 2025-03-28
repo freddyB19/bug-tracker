@@ -1,15 +1,7 @@
-import os
-import sys
-from unittest.mock import patch 
-
 import pytest
 
 from pydantic import ValidationError
 from fastapi import Request
-
-BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(BASE)
-sys.path.append(os.path.join(BASE, "apps"))
 
 from apps.utils.pagination.pagination import add_params_to_url
 from apps.utils.pagination.pagination import set_url_pagination
