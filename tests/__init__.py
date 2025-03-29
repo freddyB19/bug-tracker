@@ -5,3 +5,4 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE)
 sys.path.append(os.path.join(BASE, "apps"))
 
+# command: pytest -import-mode=importlib -v {file_or_directory}
