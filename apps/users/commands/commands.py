@@ -4,6 +4,7 @@ from typing import Dict
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy import or_
 
 from pydantic import validate_call
 
@@ -29,11 +30,11 @@ def command_create_user(user: schemas.UserRequest)-> User:
 
 	validate_user = db.query(
 		User
-	).filter(
-		User.name == user.name, 
-		User.email == user.email
+	).filter(or_(
+			User.username == user.username, 
+			User.email == user.email
+		)
 	).one_or_none()
-
 
 	if validate_user is not None:
 		raise ValueError("Ya existe un usuario con ese email o username")
