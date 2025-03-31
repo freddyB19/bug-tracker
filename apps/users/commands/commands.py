@@ -13,7 +13,7 @@ from apps.users.schemas import schemas
 from apps.users.models import User
 from .utils.password import HashPassword
 from .utils.password import ValidateHashedPassword
-from .utils.utils import user_properties_serializer
+from .utils.utils import user_serializer
 from apps.utils.token.token import create_token
 from apps.utils.token.token import verify_token
 from apps.utils.token.token import decode_token
@@ -169,7 +169,7 @@ def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
 		raise ValueError("Credencial invalida, la contraseña no coincide.")
 
-	user = user_properties_serializer(user = userResult)
+	user = user_serializer(user = userResult)
 	
 	if user is None:
 		raise ValueError("Ha ocurrido un error interno al momento de serializar User")
