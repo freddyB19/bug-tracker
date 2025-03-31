@@ -85,6 +85,9 @@ def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> Us
 	if user is None:
 		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
 
+	if user.email == infoUpdate.email:
+		raise ValueError("Tu nuevo email debe ser diferente al que posees actualmente")
+
 	if db.query(User).filter(User.email == infoUpdate.email).one_or_none() is not None:
 		raise ValueError(f"Ya existe un usuario con ese email: '{infoUpdate.email}'")
 
