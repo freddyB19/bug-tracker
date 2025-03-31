@@ -65,7 +65,7 @@ def command_get_user(user_id: int) -> User:
 	return user
 
 @validate_call
-def command_delete_user(user_id) -> bool:
+def command_delete_user(user_id: int) -> None:
 	db = next(get_db())
 
 	user = db.get(User, user_id)
@@ -75,8 +75,6 @@ def command_delete_user(user_id) -> bool:
 
 	db.delete(user)
 	db.commit()
-
-	return user.username
 
 @validate_call
 def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> User:
