@@ -1,20 +1,12 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.pool import StaticPool
 
 from sqlalchemy  import String
 from sqlalchemy.orm  import Mapped 
 from sqlalchemy.orm  import mapped_column
 
 Model = declarative_base()
-ENGINE = create_engine("sqlite:///:memory:")
-SESSION = Session(ENGINE)
 
-def get_db():
-	try:
-		yield SESSION
-	finally:
-		SESSION.close()
 
 class User(Model):
 	__tablename__ = "user"
