@@ -46,13 +46,11 @@ def get_user(id: int, token: str = Depends(validate_authorization)) -> schemas.U
 	return user
 
 
-@router.delete("/{id}",
-	status_code = status.HTTP_204_NO_CONTENT
-)
+@router.delete("/{id}")
 def delete_user(id: int, token: str = Depends(validate_authorization)) -> Response:
 	
 	try:
-		username = commands.command_delete_user(user_id = id)
+		commands.command_delete_user(user_id = id)
 	except ValueError as e:
 		return JSONResponse(
 			content = {"message": str(e)},
@@ -61,8 +59,9 @@ def delete_user(id: int, token: str = Depends(validate_authorization)) -> Respon
 
 	return JSONResponse(
 		content = {
-			"message": f"Usuario: '{username}' eliminado con exito"
-		}
+			"message": f"Usuario: con id: '{id}' eliminado con exito",
+		},
+		status_code = status.HTTP_204_NO_CONTENT
 	)
 
 
