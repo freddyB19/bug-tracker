@@ -14,11 +14,22 @@ from apps.users.models import User
 from .utils.password import HashPassword
 from .utils.password import ValidateHashedPassword
 from .utils.utils import user_serializer
+from .utils.error_messages import (
+	EmailORUsernameInvalid,
+	DoesNotExistsUser,
+	EmailUnchanged,
+	EmailAlreadyExists,
+	UsernameAlreadyExists,
+	UsernamelUnchanged,
+	InvalidCredentials,
+	InvalidCredentialsNoEmail,
+	SerializerUser
+)
+
 from apps.utils.token.token import create_token
 from apps.utils.token.token import verify_token
 from apps.utils.token.token import decode_token
 from apps.utils.token.token import create_refresh_token
-
 from apps.utils.token.token import TokenDecode
 from apps.utils.token.token import TokenCreate
 from apps.utils.token.token import TokenRefresh
@@ -37,7 +48,7 @@ def command_create_user(user: schemas.UserRequest)-> User:
 	).one_or_none()
 
 	if validate_user is not None:
-		raise ValueError("Ya existe un usuario con ese email o username")
+		raise ValueError(EmailORUsernameInvalid.get(), 409)
 
 	new_user = User(
 		name = user.name, 
@@ -60,7 +71,7 @@ def command_get_user(user_id: int) -> User:
 	user = db.get(User, user_id)
 
 	if user is None:
-		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+		raise ValueError(DoesNotExistsUser.get(id = user_id), 404)
 
 	return user
 
@@ -71,7 +82,7 @@ def command_delete_user(user_id: int) -> None:
 	user = db.get(User, user_id)
 
 	if user is None:
-		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+		raise ValueError(DoesNotExistsUser.get(id = user_id), 404)
 
 	db.delete(user)
 	db.commit()
@@ -83,19 +94,19 @@ def command_update_email_user(user_id: int, infoUpdate: schemas.UserEmail) -> Us
 	user = db.get(User, user_id)
 
 	if user is None:
-		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+		raise ValueError(DoesNotExistsUser.get(id = user_id), 404)
 
 	if user.email == infoUpdate.email:
-		raise ValueError("Tu nuevo email debe ser diferente al que posees actualmente")
+		raise ValueError(EmailUnchanged.get(), 409)
 
 	if db.query(User).filter(User.email == infoUpdate.email).one_or_none() is not None:
-		raise ValueError(f"Ya existe un usuario con ese email: '{infoUpdate.email}'")
+		raise ValueError(EmailAlreadyExists.get(email = infoUpdate.email), 409)
 
 	passwordHashed = user.password
 	passwordPlainText = infoUpdate.password
 
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
-		raise ValueError("Credencial invalida, la contraseña no coincide.")
+		raise ValueError(InvalidCredentials.get(), 401)
 
 	user.email = infoUpdate.email
 
@@ -111,7 +122,7 @@ def command_update_password_user(user_id: int, infoUpdate: schemas.UserPassword)
 	user = db.get(User, user_id)
 
 	if user is None:
-		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+		raise ValueError(DoesNotExistsUser.get(id = user_id), 404)
 
 	passwordPlainText = infoUpdate.password
 	user.password = HashPassword.getHash(password = passwordPlainText)
@@ -129,19 +140,19 @@ def command_update_username_user(user_id: int, infoUpdate: schemas.UserUsername)
 	user = db.get(User, user_id)
 
 	if user is None:
-		raise ValueError(f"No existe información sobre el usuario '{user_id}'")
+		raise ValueError(DoesNotExistsUser.get(id = user_id), 404)
 
 	if user.username == infoUpdate.username:
-		raise ValueError("Tu nuevo nombre de usuario debe ser diferente al que posees actualmente.")
+		raise ValueError(UsernamelUnchanged.get(), 409)
 
 	if db.query(User).filter(User.username == infoUpdate.username).one_or_none() is not None:
-		raise ValueError(f"Ya existe un usuario con ese username: '{infoUpdate.username}'")
+		raise ValueError(UsernameAlreadyExists.get(username = infoUpdate.username), 409)
 
 	passwordHashed = user.password
 	passwordPlainText = infoUpdate.password
 
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
-		raise ValueError("Credencial invalida, la contraseña no coincide.")
+		raise ValueError(InvalidCredentials.get(), 401)
 
 	user.username = infoUpdate.username
 
@@ -161,18 +172,18 @@ def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
 	)
 
 	if userResult is None:
-		raise ValueError(f"Credencial invalida, no exite un usuario con ese email: {infoLogin.email}")
+		raise ValueError(InvalidCredentialsNoEmail.get(email = infoLogin.email), 401)
 
 	passwordHashed = userResult.password
 	passwordPlainText = infoLogin.password
 
 	if not ValidateHashedPassword.is_validate(passwordPlainText, passwordHashed):
-		raise ValueError("Credencial invalida, la contraseña no coincide.")
+		raise ValueError(InvalidCredentials.get(), 401)
 
 	user = user_serializer(user = userResult)
 	
 	if user is None:
-		raise ValueError("Ha ocurrido un error interno al momento de serializar User")
+		raise TypeError(SerializerUser.get())
 	
 	token = TokenCreate.main(data = user)
 	refresh_token = TokenRefresh.main(data = user)
