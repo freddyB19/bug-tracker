@@ -1,5 +1,4 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.pool import StaticPool
 
 from sqlalchemy  import String
 from sqlalchemy.orm  import Mapped 
