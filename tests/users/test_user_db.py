@@ -2,10 +2,11 @@ import pytest
 
 from sqlalchemy.exc import IntegrityError
 
-from . import User
-from . import Model
 from tests import ENGINE
 from tests import SESSION
+
+from apps import Model
+from apps.users.models import User
 
 class TestUserDB:
 
@@ -17,7 +18,7 @@ class TestUserDB:
 
 		user = User(
 			name = 'prueba',
-			email = 'prueba19.@gmail.com',
+			email = 'prueba19@gmail.com',
 			username = 'prueba19',
 			password = '12345'
 		)

@@ -4,6 +4,12 @@ from  unittest.mock import patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from tests import ENGINE
+from tests import SESSION
+from tests import get_db
+
+from apps import Model
+from apps.users.models import User
 from apps.users.routes import router
 from apps.users.schemas import schemas
 from apps.users.commands.utils.password import HashPassword
@@ -20,12 +26,6 @@ from apps.users.commands.utils.error_messages import (
 	SerializerUser
 )
 
-
-from . import User
-from . import Model
-from tests import ENGINE
-from tests import SESSION
-from tests import get_db
 
 app = FastAPI()
 

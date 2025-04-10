@@ -3,13 +3,12 @@ from unittest.mock import patch
 
 from pydantic import ValidationError
 
-from . import User
-from . import Model
 from tests import ENGINE
 from tests import SESSION
 from tests import get_db
 
-
+from apps import Model
+from apps.users.models import User
 from apps.users.schemas import schemas
 from apps.users.commands import commands
 from apps.utils.token.token import TokenCreate
