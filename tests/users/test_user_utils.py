@@ -3,11 +3,11 @@ from unittest.mock import patch
 
 from pydantic import ValidationError
 
-from . import Model
-from . import ENGINE
-from . import SESSION
-from . import get_db
 from . import User
+from . import Model
+from tests import ENGINE
+from tests import SESSION
+from tests import get_db
 
 from apps.users.commands.utils.utils import user_serializer
 from apps.users.commands.utils.password import HashPassword
