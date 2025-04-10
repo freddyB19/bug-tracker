@@ -1,46 +1,19 @@
 import pytest
 
-from dotenv import load_dotenv
-from sqlalchemy import create_mock_engine
-from sqlalchemy import create_engine
-
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import declarative_base
-
-from sqlalchemy  import String
-
-from sqlalchemy.orm  import Mapped 
-from sqlalchemy.orm  import mapped_column
-
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.exc import IdentifierError
 
-
-Model = declarative_base()
-
-class User(Model):
-	__tablename__ = "user"
-	id: Mapped[int] = mapped_column(primary_key = True, index = True, nullable=False, unique=True)
-	name: Mapped[str] = mapped_column(String(20), insert_default="")
-	email: Mapped[str] = mapped_column(String, unique=True)
-	username: Mapped[str] = mapped_column(String(20), unique=True)
-	password: Mapped[str] = mapped_column(String)
-
-
-	def __repr__(self):
-		return f"User(id={self.id}, name={self.name}, email={self.email}, username={self.username})"
-
+from . import User
+from . import Model
+from tests import ENGINE
+from tests import SESSION
 
 class TestUserDB:
 
-	@classmethod
-	def setup_class(cls):
-		engine = create_engine("sqlite:///:memory:")
+	def setup_method(self):
+		Model.metadata.drop_all(ENGINE)
+		Model.metadata.create_all(ENGINE)
 
-		Model.metadata.drop_all(engine)
-		Model.metadata.create_all(engine)
-
-		cls.db = Session(engine)
+		self.db = SESSION
 
 		user = User(
 			name = 'prueba',
@@ -49,9 +22,10 @@ class TestUserDB:
 			password = '12345'
 		)
 
-		cls.user = user
+		self.user = user
 
 	def test_valid_create_user(self):
+		""" Validar que se cree un nuevo usuario """
 		new_user = self.user
 		self.db.add(new_user)
 		self.db.commit()
@@ -61,20 +35,22 @@ class TestUserDB:
 		assert new_user.name == "prueba"
 
 	
-	@pytest.mark.xfail(reason = "Datos invalidos", raises=IntegrityError)
+	@pytest.mark.xfail(reason = "Datos incompletos", raises=IntegrityError)
 	def test_invalid_create_user(self):
-		""" """
+		""" 
+			Validar que no se cree un usuario con datos incompletos
+		"""
 		user = User(name="prueba", email="prueba19@gmail.com")
 		self.db.add(user)
-
-		try:
-			self.db.commit()
-		except IntegrityError as e:
-			self.db.rollback()
+		self.db.commit()
 
 
 	@pytest.mark.xfail(reason = "Email existente", raises=IntegrityError)
 	def test_invalid_email_duplicate(self):
+		"""
+			Validar que no se cree un nuevo usuario con un 'email'
+			ya registrado
+		"""
 		user2 = User(
 			name = 'prueba',
 			email = 'prueba19.@gmail.com',
@@ -83,14 +59,15 @@ class TestUserDB:
 		)
 
 		self.db.add_all([self.user, user2])
+		self.db.commit()
 
-		try:	
-			self.db.commit()
-		except IntegrityError as e:
-			self.db.rollback()
 		
 	@pytest.mark.xfail(reason = "Username existente", raises=IntegrityError)
 	def test_invalid_username_duplicate(self):
+		"""
+			Validar que no se cree un nuevo usuario con un 'username'
+			ya registrado
+		"""
 		user2 = User(
 			name = 'prueba',
 			email = 'prueba192.@gmail.com',
@@ -99,13 +76,10 @@ class TestUserDB:
 		)
 
 		self.db.add_all([self.user, user2])
-		
-		try:
-			self.db.commit()
-		except IntegrityError as e:
-			self.db.rollback()
+		self.db.commit()
 
-	@classmethod
-	def teardown_class(cls):
-		cls.db.close()
+
+	def teardown_method(self):
+		self.db.rollback()
+		self.db.close()
 
