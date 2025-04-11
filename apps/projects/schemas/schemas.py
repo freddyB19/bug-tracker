@@ -59,7 +59,7 @@ class ProjectRequest(ProjectBase):
 		max_length = MAX_LENGTH_DESCRIPTION, 
 		min_length = MIN_LENGTH_DESCRIPTION
 	)
-	priority: ChoiceProrityField
+	priority: ChoiceProrityField = Field(default = ChoicesPrority.normal.name)
 	title: LengthTitleField
 
 
