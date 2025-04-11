@@ -40,12 +40,22 @@ def check_length_title(value: str) -> str:
 
 	return value
 
+def check_length_description(value: str) -> str:
+	if len(value) > MAX_LENGTH_DESCRIPTION:
+		raise ValueError(f"La descripción es demasiado larga, debe ser menor o igual a {MAX_LENGTH_DESCRIPTION} caracteres")
+
+	if len(value) <= MIN_LENGTH_DESCRIPTION:
+		raise ValueError(f"La descripción es demasiado corta, debe ser mayor a {MIN_LENGTH_DESCRIPTION} caracteres")
+
+	return value
 
 LowerProrityField = Annotated[str, PlainValidator(
 	lambda value: value.lower()
 )]
 ChoiceProrityField = Annotated[LowerProrityField, AfterValidator(set_choice_priority)]
 LengthTitleField = Annotated[str, AfterValidator(check_length_title)]
+LengthDescriptionField = Annotated[str, AfterValidator(check_length_description)]
+
 
 
 class ProjectBase(BaseModel):
@@ -55,10 +65,7 @@ class ProjectBase(BaseModel):
 
 class ProjectRequest(ProjectBase):
 	user_id:int
-	description: Optional[str | None] = Field(
-		max_length = MAX_LENGTH_DESCRIPTION, 
-		min_length = MIN_LENGTH_DESCRIPTION
-	)
+	description: LengthDescriptionField
 	priority: ChoiceProrityField = Field(default = ChoicesPrority.normal.name)
 	title: LengthTitleField
 
@@ -72,7 +79,7 @@ class ProjectResponse(ProjectBase):
 
 class ProjectUpdate(BaseModel):
 	user_id: int
-	description: Optional[str | None] = None
+	description: Optional[LengthDescriptionField | None] = None
 	title: Optional[LengthTitleField | None] = None
 	priority: Optional[ChoiceProrityField | None] = None
 
