@@ -84,10 +84,6 @@ class ProjectUpdate(BaseModel):
 	priority: Optional[ChoiceProrityField | None] = None
 
 
-class ProjectDelete(BaseModel):
-	user_id: int
-
-
 class ProjectSimpleResponse(ProjectBase):
 	id: int
 	created: datetime
