@@ -77,11 +77,10 @@ def update_project(id: int, project: schemas.ProjectUpdate, token: str = Depends
 	"/{id}",
 	status_code = status.HTTP_204_NO_CONTENT,
 )
-def delete_project(id: int, project: schemas.ProjectDelete, token: str = Depends(validate_authorization)) -> JSONResponse:
+def delete_project(id: int, token: str = Depends(validate_authorization)) -> JSONResponse:
 	try:
 		commands.command_delete_project(
 			project_id = id,
-			infoDelete = project
 		)
 	except ValueError as e:
 		return JSONResponse(

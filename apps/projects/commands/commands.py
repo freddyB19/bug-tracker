@@ -86,16 +86,13 @@ def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -
 	return project
 
 @validate_call
-def command_delete_project(project_id: int, infoDelete: schemas.ProjectDelete) -> None:
+def command_delete_project(project_id: int) -> None:
 	db = next(get_db())
 
 	project = db.get(Project, project_id)
 
 	if project is None:
 		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
-
-	if project.user_id != infoDelete.user_id:
-		raise ValueError(f"El usuario no puede eliminar un proyecto que no le pertenece.")
 
 	db.delete(project)
 	db.commit()
