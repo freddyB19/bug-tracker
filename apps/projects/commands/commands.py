@@ -13,6 +13,13 @@ from apps.projects.models import Project
 from apps.projects.schemas import schemas
 from apps.projects.models import ChoicesPrority
 
+from .utils.error_messages import (
+	InvalidPriority,
+	UnauthorizedProject,
+	DoesNotExistsProject
+)
+
+from apps.users.commands.utils.error_messages import DoesNotExistsUser
 
 CHOICES:list = [choice.name for choice in ChoicesPrority]
 
@@ -22,10 +29,10 @@ def command_create_project(project: schemas.ProjectRequest) -> Project:
 	user = db.get(User, project.user_id)
 
 	if user is None:
-		raise ValueError(f"No existe información sobre el usuario con ID:'{project.user_id}'")
+		raise ValueError(DoesNotExistsUser.get(id = project.user_id), 404)
 
 	if project.priority not in CHOICES:
-		raise ValueError(f"La prioridad indicada es incorrecta, debe ser entre {CHOICES}")
+		raise ValueError(InvalidPriority.get(choices = CHOICES), 400)
 
 	new_project = Project(
 		title = project.title, 
@@ -46,7 +53,7 @@ def command_get_project(project_id: int) -> Project:
 	db = next(get_db())
 
 	if db.query(Project).filter(Project.id == project_id).one_or_none() is None:
-		raise ValueError(f"No existe información sobre el proyecto.")
+		raise ValueError(DoesNotExistsProject.get(id = project_id), 404)
 
 	sql = (
 		select(Project)
@@ -67,7 +74,7 @@ def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -
 	values = infoUpdate.model_dump(exclude_defaults = True, exclude = ['user_id'])
 
 	if db.query(Project).filter(Project.id == project_id, Project.user_id == user['user_id']).one_or_none() is None:
-		raise ValueError(f"No existe información sobre este proyecto o no le pertenece a este usuario.'{project_id}'")
+		raise ValueError(UnauthorizedProject.get(id = project_id), 401)
 
 	sql = (
 		update(Project)
@@ -92,7 +99,7 @@ def command_delete_project(project_id: int) -> None:
 	project = db.get(Project, project_id)
 
 	if project is None:
-		raise ValueError(f"No existe información sobre el proyecto con ID:'{project_id}'")
+		raise ValueError(DoesNotExistsProject.get(id = project_id), 404)
 
 	db.delete(project)
 	db.commit()
