@@ -7,7 +7,6 @@ from fastapi import Request
 from fastapi import APIRouter
 from fastapi import Query
 
-
 from fastapi.responses import JSONResponse
 
 from apps.projects.schemas import schemas
@@ -19,6 +18,13 @@ from apps.utils.token.token import validate_authorization
 
 router  = APIRouter(prefix = '/project')
 
+STATUS_CODE_ERRORS = {
+	400: status.HTTP_400_BAD_REQUEST,
+	401: status.HTTP_401_UNAUTHORIZED,
+	404: status.HTTP_404_NOT_FOUND,
+}
+
+
 @router.post(
 	"/",
  	status_code = status.HTTP_201_CREATED,
@@ -28,9 +34,11 @@ def create_project(project: schemas.ProjectRequest, token: str = Depends(validat
 	try:
 		project = commands.command_create_project(project = project)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_400_BAD_REQUEST
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return project
@@ -45,9 +53,11 @@ def get_project(id: int, token: str = Depends(validate_authorization)) -> schema
 	try:
 		project = commands.command_get_project(project_id = id)
 	except ValueError as e:
+		message, status_code = e.args
+
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return project
@@ -65,9 +75,11 @@ def update_project(id: int, project: schemas.ProjectUpdate, token: str = Depends
 			infoUpdate = project
 		)
 	except ValueError as e:
+		message, status_code = e.args
+
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return project
@@ -83,9 +95,11 @@ def delete_project(id: int, token: str = Depends(validate_authorization)) -> JSO
 			project_id = id,
 		)
 	except ValueError as e:
+		message, status_code = e.args
+
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return JSONResponse(
@@ -119,9 +133,11 @@ def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagin
 		)
 
 	except ValueError as e:
+		message, status_code = e.args
+
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 
