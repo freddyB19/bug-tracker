@@ -98,7 +98,7 @@ def command_delete_project(project_id: int) -> None:
 	db.commit()
 
 @validate_call
-def command_get_projects_user(page: int, pageSize: int, user_id: int) -> List[Project]:
+def command_get_projects_user(user_id: int, page: int = 0, pageSize: int = 1) -> List[Project]:
 	db = next(get_db())
 
 	start = page * pageSize
