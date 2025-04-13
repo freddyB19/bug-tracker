@@ -102,10 +102,6 @@ def delete_project(id: int, token: str = Depends(validate_authorization)) -> JSO
 			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
-	return JSONResponse(
-		content={"message": f"Proyecto: con ID '{id}' eliminado con exito."}
-	)
-
 
 #TODO:
 # Cambiar la ruta url de este endpoint
