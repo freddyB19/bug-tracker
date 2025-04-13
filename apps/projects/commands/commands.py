@@ -73,6 +73,9 @@ def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -
 	user = infoUpdate.model_dump(include = ['user_id'])
 	values = infoUpdate.model_dump(exclude_defaults = True, exclude = ['user_id'])
 
+	if db.query(Project).filter(Project.id == project_id).one_or_none() is None:
+		raise ValueError(DoesNotExistsProject.get(id = project_id), 404)
+
 	if db.query(Project).filter(Project.id == project_id, Project.user_id == user['user_id']).one_or_none() is None:
 		raise ValueError(UnauthorizedProject.get(id = project_id), 401)
 
