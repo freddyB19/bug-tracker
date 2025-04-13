@@ -21,4 +21,4 @@ class UnauthorizedProject:
 	@classmethod
 	@validate_call(config = ConfigDict(hide_input_in_errors = True))
 	def get(cls, id: int) -> str:
-		return f"No existe información sobre este proyecto o no le pertenece a este usuario. Proyecto ID: '{id}'"
+		return f"No existe información sobre este usuario o este proyecto no le pertenece. Proyecto ID: '{id}'"
