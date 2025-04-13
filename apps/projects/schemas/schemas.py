@@ -9,11 +9,11 @@ from pydantic import BaseModel
 from pydantic import AfterValidator
 from pydantic import PlainValidator
 from pydantic import field_validator
+from pydantic import PlainSerializer
 
 from apps.projects.models import ChoicesPrority
 from apps.users.schemas.schemas import UserResponse
 from apps.utils.pagination import pagination as pg
-
 
 MAX_LENGTH_TITLE = 30
 MIN_LENGTH_TITLE = 5 
@@ -55,7 +55,9 @@ LowerProrityField = Annotated[str, PlainValidator(
 ChoiceProrityField = Annotated[LowerProrityField, AfterValidator(set_choice_priority)]
 LengthTitleField = Annotated[str, AfterValidator(check_length_title)]
 LengthDescriptionField = Annotated[str, AfterValidator(check_length_description)]
-
+PriorityField = Annotated[int, PlainSerializer(
+	lambda value: ChoicesPrority(value).name, return_type = str
+)]
 
 
 class ProjectBase(BaseModel):
@@ -73,9 +75,17 @@ class ProjectRequest(ProjectBase):
 class ProjectResponse(ProjectBase):
 	id: int
 	user: UserResponse
+	priority: PriorityField
 	created: datetime
 	updated: datetime
 
+class ProjectFullResponse(ProjectBase):
+	id: int
+	priority: PriorityField
+	description: str 
+	user: UserResponse
+	created: datetime
+	updated: datetime
 
 class ProjectUpdate(BaseModel):
 	user_id: int
@@ -88,6 +98,7 @@ class ProjectSimpleResponse(ProjectBase):
 	id: int
 	created: datetime
 	updated: datetime
+	priority: PriorityField
 	description: str | None
 
 
