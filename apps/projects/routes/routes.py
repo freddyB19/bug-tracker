@@ -47,9 +47,9 @@ def create_project(project: schemas.ProjectRequest, token: str = Depends(validat
 @router.get(
 	"/{id}",
  	status_code = status.HTTP_200_OK,
- 	response_model = schemas.ProjectResponse,
+ 	response_model = schemas.ProjectFullResponse,
  )
-def get_project(id: int, token: str = Depends(validate_authorization)) -> schemas.ProjectResponse:
+def get_project(id: int, token: str = Depends(validate_authorization)) -> schemas.ProjectFullResponse:
 	try:
 		project = commands.command_get_project(project_id = id)
 	except ValueError as e:
