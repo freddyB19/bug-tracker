@@ -775,6 +775,114 @@ class TestCommandsProject:
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_get_project_by_user_with_filter(self):
+		"""
+			Obtener todos los proyectos de un usuario pero,
+			filtrando los proyectos por prioridad
+		"""
+		project1 = set_project(
+			title = "Videojuego de Arcade",
+			priority = "baja",
+			description = "desarrollar un videojuego"
+		)
+
+		project2 = set_project(
+			title = "App de mensajeria",
+			priority = "baja",
+			description = "aplicación movil de mensajes"
+		)
+
+		project3 = set_project(
+			title = "Traductor AI",
+			priority = "alta",
+			description = "una app que usa la IA para traducir"
+		)
+
+		self.db.add_all([project1, project2, project3])
+		self.db.commit()
+
+		page = 0
+		pageSize = 5
+		user_id = 1
+		search = {"priority": "baja"}
+
+		projects = commands.command_get_projects_user(
+			page = page,
+			pageSize = pageSize,
+			user_id = user_id,
+			search = search
+		)
+
+		assert projects
+		assert len(projects) == 2
+
+		page = 0
+		pageSize = 5
+		user_id = 1
+		search = {"priority": "alta"}
+
+		projects = commands.command_get_projects_user(
+			page = page,
+			pageSize = pageSize,
+			user_id = user_id,
+			search = search
+		)
+
+		assert projects
+		assert len(projects) == 1
+
+		page = 0
+		pageSize = 5
+		user_id = 1
+		search = {"priority": "normal"}
+
+		projects = commands.command_get_projects_user(
+			page = page,
+			pageSize = pageSize,
+			user_id = user_id,
+			search = search
+		)
+
+		assert projects
+		assert len(projects) == 1
+
+		page = 0
+		pageSize = 5
+		user_id = 1
+		search = {"priority": "inmediata"}
+
+		projects = commands.command_get_projects_user(
+			page = page,
+			pageSize = pageSize,
+			user_id = user_id,
+			search = search
+		)
+
+		assert not projects
+		assert len(projects) == 0
+
+
+	@pytest.mark.xfail(reason = "Parametro de busqueda incorreto", raises = ValueError)
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_get_project_by_user_with_wrong_filter_value(self):
+		"""
+			Obtener todos los proyectos de un usuario pero,
+			aplicando un valor de filtro incorrecto
+		"""
+		page = 0
+		pageSize = 5
+		user_id = self.user.id
+		search = {"priority": "ahora"}
+
+		projects = commands.command_get_projects_user(
+			page = page,
+			pageSize = pageSize,
+			user_id = user_id,
+			search = search
+		)
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
 	def test_get_total_project_by_user(self):
 		"""
 			Obtener el total de proyectos que tiene
@@ -803,6 +911,108 @@ class TestCommandsProject:
 		)
 
 		assert total == 4
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_get_total_project_by_user_with_filter(self):
+		"""
+			Obtener el total de proyectos que tiene
+			un usuario pero, aplicando filtro por prioridad
+			de los proyectos
+		"""
+		project1 = set_project(
+			title = "Videojuego de Arcade",
+			priority = "baja",
+			description = "desarrollar un videojuego"
+		)
+
+		project2 = set_project(
+			title = "App de mensajeria",
+			priority = "baja",
+			description = "aplicación movil de mensajes"
+		)
+
+		project3 = set_project(
+			title = "Traductor AI",
+			priority = "alta",
+			description = "una app que usa la IA para traducir"
+		)
+
+		self.db.add_all([project1, project2, project3])
+		self.db.commit()
+
+		search = {"priority": "baja"}
+
+		total = commands.command_get_total_project_user(
+			user_id = self.user.id,
+			search = search
+		)
+
+		assert total == 2
+
+		search = {"priority": "alta"}
+
+		total = commands.command_get_total_project_user(
+			user_id = self.user.id,
+			search = search
+		)
+
+		assert total == 1
+
+		search = {"priority": "normal"}
+
+		total = commands.command_get_total_project_user(
+			user_id = self.user.id,
+			search = search
+		)
+
+		assert total == 1
+
+		search = {"priority": "inmediata"}
+
+		total = commands.command_get_total_project_user(
+			user_id = self.user.id,
+			search = search
+		)
+
+		assert total == 0
+
+
+	@pytest.mark.xfail(reason = "Parametro de busqueda incorreto", raises = ValueError)
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_get_total_project_by_user_with_wrong_filter_value(self):
+		"""
+			Obtener el total de proyectos que tiene
+			un usuario pero, aplicando filtro por prioridad
+			de los proyectos
+		"""
+		project1 = set_project(
+			title = "Videojuego de Arcade",
+			priority = "baja",
+			description = "desarrollar un videojuego"
+		)
+
+		project2 = set_project(
+			title = "App de mensajeria",
+			priority = "baja",
+			description = "aplicación movil de mensajes"
+		)
+
+		project3 = set_project(
+			title = "Traductor AI",
+			priority = "alta",
+			description = "una app que usa la IA para traducir"
+		)
+
+		self.db.add_all([project1, project2, project3])
+		self.db.commit()
+
+		search = {"priority": "ahora"}
+
+		total = commands.command_get_total_project_user(
+			user_id = self.user.id,
+			search = search
+		)
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
