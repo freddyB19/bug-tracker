@@ -134,7 +134,7 @@ class TestProjectDB:
 	
 	def test_create_project_with_wrong_description(self):
 		"""
-			Intentar crear un proyecto con un 'descripción' mayor
+			Intentar crear un proyecto con una 'descripción' mayor
 			a la restricción indicada en la tabla. 
 		"""
 		descripcion = """
@@ -186,7 +186,7 @@ class TestProjectDB:
 	@pytest.mark.xfail(reason = "Opción erronea de prioridad", raises = (KeyError, LookupError))
 	def test_create_project_with_wrong_priority(self):
 		"""
-			Intentar crear un proyecto con un 'prioridad'
+			Intentar crear un proyecto con una 'prioridad'
 			distinta a las opciones disponibles
 		"""
 		prioridad = "ahora" 
