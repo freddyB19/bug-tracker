@@ -28,7 +28,9 @@ def message_update(ticket_id: int, data: Dict[str, str | int ] | None = None) ->
 	update_fields = ""
 
 	for field,value in data.items():
-		update_fields += f" {field}='{value}' "
+		if update_fields:
+			update_fields += " "
+		update_fields += f"{field}='{value}'"
 
 	return f"Se han actualizado los campos: [{update_fields}] del ticket con ID {ticket_id}"
 
