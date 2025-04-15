@@ -89,9 +89,9 @@ class ProjectFullResponse(ProjectBase):
 
 class ProjectUpdate(BaseModel):
 	user_id: int
-	description: Optional[LengthDescriptionField | None] = None
-	title: Optional[LengthTitleField | None] = None
-	priority: Optional[ChoiceProrityField | None] = None
+	description: Optional[LengthDescriptionField] = None
+	title: Optional[LengthTitleField] = None
+	priority: Optional[ChoiceProrityField] = None
 
 
 class ProjectSimpleResponse(ProjectBase):
@@ -113,3 +113,4 @@ class ProjectsByUser(pg.ResponsePagination):
 
 class ProjectsPagination(pg.ListPagination):
 	user_id: int
+	priority: Optional[ChoiceProrityField] = None
