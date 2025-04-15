@@ -1,4 +1,6 @@
 from typing import List
+from typing import Dict
+
 
 from sqlalchemy import func
 from sqlalchemy import select
@@ -108,33 +110,41 @@ def command_delete_project(project_id: int) -> None:
 	db.commit()
 
 @validate_call
-def command_get_projects_user(user_id: int, page: int = 0, pageSize: int = 1) -> List[Project]:
+def command_get_projects_user(user_id: int, search: Dict[str, str] = {}, page: int = 0, pageSize: int = 1) -> List[Project]:
 	db = next(get_db())
+
+	if "priority" in search and search["priority"] not in CHOICES:
+		raise ValueError(InvalidPriority.get(choices = CHOICES), 400)
 
 	start = page * pageSize
 
-	sql = (
-		select(Project)
-		.join(User)
-		.where(Project.user_id == user_id)
-		.offset(start)
-		.limit(pageSize)
-	)
+	filter_search = search
+	
+	filter_search.update({
+		"user_id": user_id
+	})
 
-	projects = db.scalars(sql).all()
+	projects = db.query(Project).filter_by(
+		**filter_search
+	).offset(start).limit(pageSize)
 
-	return projects
+	return projects.all()
 
 @validate_call
-def command_get_total_project_user(user_id: int) -> int:
+def command_get_total_project_user(user_id: int, search: Dict = {}) -> int:
 	db = next(get_db())
 
-	sql = (
-		select(func.count())
-		.select_from(Project)
-		.where(Project.user_id == user_id)
-	)
+	if "priority" in search and search["priority"] not in CHOICES:
+		raise ValueError(InvalidPriority.get(choices = CHOICES), 400)
 
-	total = db.scalar(sql)
+	filter_search = search
+	
+	filter_search.update({
+		"user_id": user_id
+	})
+
+	total = db.query(Project).filter_by(
+		**filter_search
+	).count()
 
 	return total
