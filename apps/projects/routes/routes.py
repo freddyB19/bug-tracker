@@ -117,15 +117,17 @@ def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagin
 		user = c_users.command_get_user(
 			user_id = query.user_id
 		)
-		
+
 		total = commands.command_get_total_project_user(
-			user_id = query.user_id
+			user_id = query.user_id,
+			search = query.model_dump(include = ["priority"], exclude_defaults = True)
 		)
 
 		projects = commands.command_get_projects_user(
 			page = query.page,
 			pageSize = query.pageSize,
-			user_id = query.user_id
+			user_id = query.user_id,
+			search = query.model_dump(include = ["priority"], exclude_defaults = True)
 		)
 
 	except ValueError as e:
