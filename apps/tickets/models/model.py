@@ -22,7 +22,7 @@ class ChoicesState(enum.Enum):
 	nuevo = 0
 	desarrollo = 1
 	prueba = 2
-	revisión = 3
+	repaso = 3
 	terminado = 4
 
 class ChoicesType(enum.Enum):
