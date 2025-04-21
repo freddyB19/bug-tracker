@@ -4,11 +4,20 @@ from typing import Dict
 from typing_extensions import Annotated
 
 from pydantic import validate_call
+from pydantic import BeforeValidator
 
 from apps.tickets.models import StateTicketHistory 
 
+def is_enum(value: Enum) -> Enum:
+	if not type(value) == type(Enum):
+		raise ValueError("el tipo de dato debe ser un Enum")
+
+	return value
+
+IsEnum = Annotated[Any, BeforeValidator(is_enum)]
+
 @validate_call
-def validate_choice(choice: str, options: Annotated[Any, Enum]) -> bool:
+def validate_choice(choice: str, options: IsEnum) -> bool:
 	str_choices = [option.name for option in options]
 
 	if choice not in str_choices:
