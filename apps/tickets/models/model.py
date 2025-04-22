@@ -43,7 +43,7 @@ class Ticket(Model):
 	description: Mapped[str | None] = mapped_column(String(200))
 	priority: Mapped[Enum] = mapped_column(
 		Enum(ChoicesPrority), 
-		insert_default=ChoicesPrority.baja
+		insert_default=ChoicesPrority.normal
 	)
 	created: Mapped[datetime] = mapped_column(insert_default = func.now())
 	updated: Mapped[datetime] = mapped_column(insert_default = func.now(), onupdate=func.now())
