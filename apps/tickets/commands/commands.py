@@ -55,11 +55,6 @@ def command_create_ticket(ticket: schemas.TicketRequest) -> Ticket:
 	if project is None:
 		raise ValueError("No existe información sobre este proyecto")
 
-
-	if not utils.validate_choice(choice = ticket.type, options = ChoicesType):
-		raise ValueError("El tipo elegido es el incorrecto")
-	if not utils.validate_choice(choice = ticket.state, options = ChoicesState):
-		raise ValueError("El estado elegido es el incorrecto")
 	if not utils.validate_choice(choice = ticket.priority, options = ChoicesPrority):
 		raise ValueError("La prioridad elegida es la incorrecta")
 
@@ -67,8 +62,6 @@ def command_create_ticket(ticket: schemas.TicketRequest) -> Ticket:
 	new_ticket = Ticket(
 		title = ticket.title,
 		description = ticket.description,
-		type = ticket.type,
-		state = ticket.state,
 		priority = ticket.priority,
 		project_id = ticket.project_id,
 	)
