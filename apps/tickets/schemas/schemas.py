@@ -120,7 +120,7 @@ class TicketUpdate(BaseModel):
 	title: Optional[LenValidationField] = None
 	description: Optional[LenValidationField] = None
 	type: Optional[TypeField] = None
-	state: Optional[str] = None
+	state: Optional[StateField] = None
 	priority: Optional[PriorityField] = None
 
 
