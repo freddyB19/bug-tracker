@@ -94,7 +94,14 @@ def command_get_ticket(ticket_id: int) -> Ticket:
 @validate_call
 def command_get_total_tickets_filter(project_id: int, search: Dict[str, str] = {}) -> int:
 	db = next(get_db())
-		
+
+	if "type" in search and not utils.validate_choice(choice = search["type"], options = ChoicesType):
+		raise ValueError("El tipo elegido es el incorrecto")
+	if "state" in search and not utils.validate_choice(choice = search["state"], options = ChoicesState):
+		raise ValueError("El estado elegido es el incorrecto")
+	if "priority" in search and not utils.validate_choice(choice = search["priority"], options = ChoicesPrority):
+		raise ValueError("La prioridad elegida es la incorrecta")
+
 	data_search = search.copy()
 
 	data_search.update({
