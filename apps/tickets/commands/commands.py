@@ -92,11 +92,11 @@ def command_get_ticket(ticket_id: int) -> Ticket:
 	return ticket
 
 @validate_call
-def command_get_total_tickets_filter(project_id: int, infoFilter: schemas.TicketFilterPagination) -> int:
+def command_get_total_tickets_filter(project_id: int, search: Dict[str, str] = {}) -> int:
 	db = next(get_db())
-	
-	data_search = infoFilter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
-	
+		
+	data_search = search.copy()
+
 	data_search.update({
 		"project_id": project_id
 	})

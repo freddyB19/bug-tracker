@@ -76,8 +76,10 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 			project_id = project_id
 		)
 
+		search = ticket_filter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
+
 		total_tickets = commands.command_get_total_tickets_filter(
-			infoFilter = ticket_filter,
+			search = search,
 			project_id = project_id
 		)
 		
