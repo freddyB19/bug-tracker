@@ -4,6 +4,7 @@ from typing import Optional
 from datetime import datetime
 from typing_extensions import Annotated
 
+from pydantic import Field
 from pydantic import BaseModel
 from pydantic import AfterValidator
 from pydantic import PlainValidator
@@ -113,7 +114,7 @@ class TicketFilterPagination(pg.ListPagination, TicketFilter):
 
 
 class TicketByTitle(BaseModel):
-	title: str
+	title: str = Field(max_length = MAX_LENGTH_TITLE)
 
 
 class TicketUpdate(BaseModel):
