@@ -115,13 +115,22 @@ def command_get_total_tickets_filter(project_id: int, search: Dict[str, str] = {
 	return total
 
 @validate_call
-def command_get_ticket_by_filter(project_id: int, infoFilter: schemas.TicketFilterPagination) -> Optional[List[Ticket]]:
+def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, page: int = 0, pageSize: int = 10) -> Optional[List[Ticket]]:
 	db = next(get_db())
 
-	data_search = infoFilter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
-	data_pagination = infoFilter.model_dump(include=['page', 'pageSize'])
+	if "type" in search and not utils.validate_choice(choice = search["type"], options = ChoicesType):
+		raise ValueError("El tipo elegido es el incorrecto")
+	if "state" in search and not utils.validate_choice(choice = search["state"], options = ChoicesState):
+		raise ValueError("El estado elegido es el incorrecto")
+	if "priority" in search and not utils.validate_choice(choice = search["priority"], options = ChoicesPrority):
+		raise ValueError("La prioridad elegida es la incorrecta")
 
-	start = data_pagination["page"] * data_pagination["pageSize"]
+	if page < 0 or pageSize < 0:
+		raise ValueError("Los valores para la paginación deben ser números enteros positivos")
+
+	data_search = search.copy()
+
+	start = page * pageSize
 
 	data_search.update({
 		"project_id": project_id
@@ -129,9 +138,9 @@ def command_get_ticket_by_filter(project_id: int, infoFilter: schemas.TicketFilt
 
 	tickets = db.query(Ticket).filter_by(
 		**data_search
-	).offset(start).limit(data_pagination["pageSize"])
+	).offset(start).limit(pageSize)
 
-	return tickets
+	return tickets.all()
 
 @validate_call
 def command_get_ticket_by_title(ticket: schemas.TicketByTitle) -> Optional[List[Ticket]]:

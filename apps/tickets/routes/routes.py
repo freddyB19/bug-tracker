@@ -76,16 +76,22 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 			project_id = project_id
 		)
 
-		search = ticket_filter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
+		search_total = ticket_filter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
 
 		total_tickets = commands.command_get_total_tickets_filter(
-			search = search,
+			search = search_total,
 			project_id = project_id
 		)
 		
+		search_filter = ticket_filter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
+		
+		data_pagination = infoFilter.model_dump(include=['page', 'pageSize'])
+		
 		tickets = commands.command_get_ticket_by_filter(
-			infoFilter = ticket_filter,
-			project_id = project_id
+			project_id = project_id,
+			search = search_filter,
+			page = data_pagination['page'],
+			pageSize = data_pagination['pageSize'],
 		)
 	except ValueError as e:
 		return JSONResponse(
