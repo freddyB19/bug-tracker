@@ -201,8 +201,11 @@ def command_delete_ticket(ticket_id: int) -> None:
 	db.commit()
 
 @validate_call
-def command_get_tickets_by_project(project_id: int, page: int, pageSize: int) -> List[Ticket]:
+def command_get_tickets_by_project(project_id: int, page: int = 0, pageSize: int = 10) -> Optional[List[Ticket]]:
 	db = next(get_db())
+
+	if page < 0 or pageSize < 0:
+		raise ValueError("Los valores para la paginación deben ser números enteros positivos")
 
 	start = page * pageSize
 
