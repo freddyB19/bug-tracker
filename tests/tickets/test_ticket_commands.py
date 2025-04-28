@@ -17,7 +17,6 @@ from apps import Model
 from apps.users.models import User
 from apps.projects.models import Project
 from apps.tickets.models import Ticket
-from apps.tickets.models import Ticket
 from apps.tickets.models import ChoicesPrority
 from apps.tickets.models import ChoicesState
 from apps.tickets.models import ChoicesType
