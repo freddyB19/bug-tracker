@@ -251,8 +251,11 @@ def command_get_total_tickets_history(ticket_id: int) -> int:
 
 
 @validate_call
-def command_get_tickets_history(ticket_id: int, page: int, pageSize: int) -> Optional[TicketHistory]:
+def command_get_ticket_histories(ticket_id: int, page: int = 0, pageSize: int = 10) -> Optional[TicketHistory]:
 	db = next(get_db())
+
+	if page < 0 or pageSize < 0:
+		raise ValueError("Los valores para la paginación deben ser números enteros positivos")
 
 	start = page * pageSize
 

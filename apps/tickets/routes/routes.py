@@ -262,7 +262,7 @@ def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.
 			ticket_id = id
 		)
 
-		histories = commands.command_get_tickets_history(
+		histories = commands.command_get_ticket_histories(
 			ticket_id = id,
 			page = query.page,
 			pageSize = query.pageSize,
