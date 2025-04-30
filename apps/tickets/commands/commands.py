@@ -236,7 +236,7 @@ def command_get_total_tickets_project(project_id: int) -> int:
 
 
 @validate_call
-def command_get_total_tickets_history(ticket_id: int) -> int:
+def command_get_total_ticket_histories(ticket_id: int) -> int:
 	db = next(get_db())
 
 	sql = (
