@@ -31,7 +31,7 @@ def create_ticket(ticket: schemas.TicketRequest, token: str = Depends(validate_a
 			ticket = ticket
 		)
 
-		commands.command_add_history_ticket(
+		commands.command_add_ticket_history(
 			ticket_id = new_ticket.id, 
 			state = StateTicketHistory.crear.name
 		)
@@ -163,7 +163,7 @@ def update_ticket(id: int, ticket: schemas.TicketUpdate, token: str = Depends(va
 			infoUpdate = ticket
 		)
 		
-		commands.command_add_history_ticket(
+		commands.command_add_ticket_history(
 			ticket_id = id, 
 			state = StateTicketHistory.actualizar.name,
 			infoTicket = ticket_update

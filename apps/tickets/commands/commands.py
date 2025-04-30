@@ -23,8 +23,11 @@ from apps.projects.models.model import Project
 
 
 @validate_call
-def command_add_history_ticket(ticket_id: int, state: str, infoTicket: Dict[str, str | int ] = None) -> TicketHistory:
+def command_add_ticket_history(ticket_id: int, state: str = StateTicketHistory.crear.name, infoTicket: Dict[str, str | int ] = None) -> TicketHistory:
 	db = next(get_db())
+
+	if db.query(Ticket).filter(Ticket.id == ticket_id).one_or_none() is None:
+		raise ValueError("No existe información sobre este ticket")
 
 	if not utils.validate_choice(choice = state, options = StateTicketHistory):
 		raise ValueError(f"TicketHistory: 'state' invalido = {state}")
@@ -180,12 +183,9 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 		.returning(Ticket)
 	)
 
-	ticket = db.execute(sql).scalar_one_or_none()
-
-	db.commit()
-	db.refresh(ticket)
+	ticket = db.scalar(sql)
+	
 	db.close()
-
 	return ticket
 
 @validate_call
