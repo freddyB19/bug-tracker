@@ -90,9 +90,6 @@ def command_update_project(project_id: int, infoUpdate: schemas.ProjectUpdate) -
 	)
 
 	project = db.scalar(sql)
-
-	db.commit()
-	db.refresh(project)
 	
 	db.close()
 	return project
