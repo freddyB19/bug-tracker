@@ -140,7 +140,9 @@ class TicketResponse(TicketSchema):
 	id: int
 	created: datetime
 	updated: datetime
-
+	type: TypeStrField
+	state: StateStrField
+	priority: PriorityStrField
 	project: ProjectSimpleResponse
 
 class TicketSimpleResponse(TicketSchema):
