@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from pydantic import AfterValidator
 from pydantic import PlainValidator
 from pydantic import ValidationInfo
+from pydantic import PlainSerializer
 
 from apps.projects.schemas.schemas import ProjectSimpleResponse
 from apps.tickets.models import ChoicesType
@@ -88,6 +89,16 @@ StateField = Annotated[SetLowerChoices, AfterValidator(set_choice_state)]
 PriorityField = Annotated[SetLowerChoices, AfterValidator(set_choice_priority)]
 LenValidationField = Annotated[str, AfterValidator(check_length_value)]
 
+TypeStrField = Annotated[int, PlainSerializer(
+	lambda value: ChoicesType(value).name, return_type = str
+)]
+StateStrField = Annotated[int, PlainSerializer(
+	lambda value: ChoicesState(value).name, return_type = str
+)]
+PriorityStrField = Annotated[int, PlainSerializer(
+	lambda value: ChoicesPrority(value).name, return_type = str
+)]
+
 class TicketSchema(BaseModel):
 	title: str
 	priority: int
@@ -134,10 +145,12 @@ class TicketResponse(TicketSchema):
 
 class TicketSimpleResponse(TicketSchema):
 	id: int
+	project_id: int
 	created: datetime
 	updated: datetime
-
-	project_id: int
+	type: TypeStrField
+	state: StateStrField
+	priority: PriorityStrField
 
 
 class TicketBasicResponse(TicketSchema):
@@ -155,13 +168,6 @@ class TicketsByProjectResponse(pg.ResponsePagination):
 
 
 class TicketPagination(pg.ListPagination):
-	project_id: int
-
-
-class TicketSimpleResponse(TicketSchema):
-	id: int
-	created: datetime
-	updated: datetime
 	project_id: int
 
 
