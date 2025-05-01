@@ -27,7 +27,8 @@ from apps import (
 from apps.utils.token.exceptions import (
 	TokenExpiredError,
 	TokenInvalidError,
-	TokenImmatureError
+	TokenImmatureError,
+	TokenDecodeError
 ) 
 
 
@@ -65,6 +66,9 @@ def validate_token(token: str) -> None:
 	except jwt.ImmatureSignatureError:
 		raise TokenImmatureError()
 
+	except jwt.DecodeError:
+		raise TokenDecodeError()
+
 
 @validate_call(config = ConfigDict(hide_input_in_errors=True))
 def verify_token(token: str = "") -> VerifyTokenResult:
@@ -79,6 +83,8 @@ def verify_token(token: str = "") -> VerifyTokenResult:
 	except TokenInvalidError as e:
 		message = e
 	except TokenImmatureError as e:
+		message = e
+	except TokenDecodeError as e:
 		message = e
 
 	return VerifyTokenResult(state = False, message = str(message))
@@ -152,7 +158,7 @@ def validate_authorization(authorization: Annotated[str | None, Header()] = None
 	if authorization is None:
 		raise HTTPException(
 				status_code = status.HTTP_401_UNAUTHORIZED, 
-				detail = "Ausencia del token en la cabecera.",
+				detail = "Ausencia del token en la cabecera",
 				headers={"WWW-Authenticate": "Bearer"},
 			)
 	token = extract_token_from_str(auth = authorization)
