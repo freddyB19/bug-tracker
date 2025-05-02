@@ -296,7 +296,7 @@ class TestTicketHistoryCommand:
 
 
 	@patch("apps.tickets.commands.commands.get_db", get_db)
-	def test_get_ticket_histories_with_pagination(self):
+	def test_get_ticket_histories_checking_pagination(self):
 		"""
 			Validar obtener el historial de cambios de
 			un ticket pero, usando paginación para
@@ -307,23 +307,23 @@ class TestTicketHistoryCommand:
 
 		ticket_id = ticket.id
 
-		histories_page_0 = commands.command_get_ticket_histories(
-			ticket_id = ticket_id,
-			page = 0,
-			pageSize = 3 
-		)
-
 		histories_page_1 = commands.command_get_ticket_histories(
 			ticket_id = ticket_id,
 			page = 1,
 			pageSize = 3 
 		)
 
-		assert histories_page_0
-		assert len(histories_page_0) == 3
+		histories_page_2 = commands.command_get_ticket_histories(
+			ticket_id = ticket_id,
+			page = 2,
+			pageSize = 3 
+		)
 
 		assert histories_page_1
-		assert len(histories_page_1) == 1
+		assert len(histories_page_1) == 3
+
+		assert histories_page_2
+		assert len(histories_page_2) == 1
 
 
 	@pytest.mark.xfail(reason = "Valor incorrecto para ticket_id", raises = ValidationError)
@@ -349,10 +349,10 @@ class TestTicketHistoryCommand:
 
 	@pytest.mark.xfail(reason = "Valor incorrecto para 'page' y 'pageSize'", raises = (ValidationError, ValueError))
 	@pytest.mark.parametrize("pagination", [
-		{"page": 0, "pageSize": -5},
+		{"page": 1, "pageSize": -5},
 		{"page": -1, "pageSize": 5},
 		{"page": 0.1, "pageSize": 5},
-		{"page": 0, "pageSize": 5.2}
+		{"page": 1, "pageSize": 5.2}
 	])
 	@patch("apps.tickets.commands.commands.get_db", get_db)
 	def test_get_ticket_histories_with_wrong_values_for_pagination(self, pagination):
