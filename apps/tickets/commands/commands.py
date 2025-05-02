@@ -11,6 +11,14 @@ from pydantic import validate_call
 
 from apps import get_db
 from .utils import utils
+from .utils.error_messages import (
+	InvalidPriority,
+	InvalidState,
+	InvalidType,
+	DoesNotExistsTicket,
+	PaginationError,
+	DoesNotExistsTicketHistory,
+)
 from apps.tickets.models import Ticket
 from apps.tickets.models import TicketHistory
 from apps.tickets.models import ChoicesType
@@ -20,17 +28,17 @@ from apps.tickets.models import StateTicketHistory
 
 from apps.tickets.schemas import schemas
 from apps.projects.models.model import Project
-
+from apps.projects.commands.utils.error_messages import DoesNotExistsProject
 
 @validate_call
 def command_add_ticket_history(ticket_id: int, state: str = StateTicketHistory.crear.name, infoTicket: Dict[str, str | int ] = None) -> TicketHistory:
 	db = next(get_db())
 
 	if db.query(Ticket).filter(Ticket.id == ticket_id).one_or_none() is None:
-		raise ValueError("No existe información sobre este ticket")
+		raise ValueError(DoesNotExistsTicket.get(id = ticket_id), 404)
 
 	if not utils.validate_choice(choice = state, options = StateTicketHistory):
-		raise ValueError(f"TicketHistory: 'state' invalido = {state}")
+		raise ValueError(DoesNotExistsTicketHistory.get(state = state), 400)
 
 	new_history = TicketHistory(
 		ticket_id = ticket_id,
@@ -56,10 +64,10 @@ def command_create_ticket(ticket: schemas.TicketRequest) -> Ticket:
 	project = db.get(Project, ticket.project_id)
 
 	if project is None:
-		raise ValueError("No existe información sobre este proyecto")
+		raise ValueError(DoesNotExistsProject.get(id = ticket.project_id), 404)
 
 	if not utils.validate_choice(choice = ticket.priority, options = ChoicesPrority):
-		raise ValueError("La prioridad elegida es la incorrecta")
+		raise ValueError(InvalidPriority.get(), 400)
 
 
 	new_ticket = Ticket(
@@ -81,7 +89,7 @@ def command_get_ticket(ticket_id: int) -> Ticket:
 	db = next(get_db())
 
 	if db.query(Ticket).filter(Ticket.id == ticket_id).one_or_none() is None:
-		raise ValueError("No existe información sobre este ticket")
+		raise ValueError(DoesNotExistsTicket.get(id = ticket_id), 404)
 
 	sql = (
 		select(Ticket)
@@ -99,11 +107,11 @@ def command_get_total_tickets_filter(project_id: int, search: Dict[str, str] = {
 	db = next(get_db())
 
 	if "type" in search and not utils.validate_choice(choice = search["type"], options = ChoicesType):
-		raise ValueError("El tipo elegido es el incorrecto")
+		raise ValueError(InvalidType.get(), 400)
 	if "state" in search and not utils.validate_choice(choice = search["state"], options = ChoicesState):
-		raise ValueError("El estado elegido es el incorrecto")
+		raise ValueError(InvalidState.get(), 400)
 	if "priority" in search and not utils.validate_choice(choice = search["priority"], options = ChoicesPrority):
-		raise ValueError("La prioridad elegida es la incorrecta")
+		raise ValueError(InvalidPriority.get(), 400)
 
 	data_search = search.copy()
 
@@ -118,22 +126,22 @@ def command_get_total_tickets_filter(project_id: int, search: Dict[str, str] = {
 	return total
 
 @validate_call
-def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, page: int = 0, pageSize: int = 10) -> Optional[List[Ticket]]:
+def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, page: int = 1, pageSize: int = 10) -> Optional[List[Ticket]]:
 	db = next(get_db())
 
 	if "type" in search and not utils.validate_choice(choice = search["type"], options = ChoicesType):
-		raise ValueError("El tipo elegido es el incorrecto")
+		raise ValueError(InvalidType.get(), 400)
 	if "state" in search and not utils.validate_choice(choice = search["state"], options = ChoicesState):
-		raise ValueError("El estado elegido es el incorrecto")
+		raise ValueError(InvalidState.get(), 400)
 	if "priority" in search and not utils.validate_choice(choice = search["priority"], options = ChoicesPrority):
-		raise ValueError("La prioridad elegida es la incorrecta")
+		raise ValueError(InvalidPriority.get(), 400)
 
 	if page < 0 or pageSize < 0:
-		raise ValueError("Los valores para la paginación deben ser números enteros positivos")
+		raise ValueError(PaginationError.get(), 400)
 
 	data_search = search.copy()
 
-	start = page * pageSize
+	start = (page - 1) * pageSize
 
 	data_search.update({
 		"project_id": project_id
@@ -165,14 +173,14 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 	db = next(get_db())
 
 	if db.query(Ticket).filter(Ticket.id == ticket_id).one_or_none() is None:
-		raise ValueError("No existe información sobre este ticket")
+		raise ValueError(DoesNotExistsTicket.get(id = ticket_id), 404)
 
 	if infoUpdate.type is not None and not utils.validate_choice(choice = infoUpdate.type, options = ChoicesType):
-		raise ValueError("El tipo elegido es el incorrecto")
+		raise ValueError(InvalidType.get(), 400)
 	if infoUpdate.state is not None and not utils.validate_choice(choice = infoUpdate.state, options = ChoicesState):
-		raise ValueError("El estado elegido es el incorrecto")
+		raise ValueError(InvalidState.get(), 400)
 	if infoUpdate.priority is not None and not utils.validate_choice(choice = infoUpdate.priority, options = ChoicesPrority):
-		raise ValueError("La prioridad elegida es la incorrecta")
+		raise ValueError(InvalidPriority.get(), 400)
 
 	update_values = infoUpdate.model_dump(exclude_defaults = True)
 
@@ -195,7 +203,7 @@ def command_delete_ticket(ticket_id: int) -> None:
 	ticket = db.get(Ticket, ticket_id)
 
 	if ticket is None:
-		raise ValueError("No existe información sobre este ticket")
+		raise ValueError(DoesNotExistsTicket.get(id = ticket_id), 404)
 
 	db.delete(ticket)
 	db.commit()
@@ -205,7 +213,7 @@ def command_get_tickets_by_project(project_id: int, page: int = 0, pageSize: int
 	db = next(get_db())
 
 	if page < 0 or pageSize < 0:
-		raise ValueError("Los valores para la paginación deben ser números enteros positivos")
+		raise ValueError(PaginationError.get(), 400)
 
 	start = page * pageSize
 
@@ -255,7 +263,7 @@ def command_get_ticket_histories(ticket_id: int, page: int = 0, pageSize: int = 
 	db = next(get_db())
 
 	if page < 0 or pageSize < 0:
-		raise ValueError("Los valores para la paginación deben ser números enteros positivos")
+		raise ValueError(PaginationError.get(), 400)
 
 	start = page * pageSize
 
@@ -276,7 +284,7 @@ def command_get_detail_ticket_history(history_id: int) -> TicketHistory:
 	db = next(get_db())
 
 	if db.query(TicketHistory).filter(TicketHistory.id == history_id).one_or_none() is None:
-		raise ValueError("No existe información sobre este historial.")
+		raise ValueError(DoesNotExistsTicketHistory.get(id = history_id), 404)
 
 	sql = (
 		select(TicketHistory)
