@@ -161,7 +161,7 @@ class TicketBasicResponse(TicketSchema):
 
 class ListTickets(BaseModel):
 	total: int
-	tickets: Optional[List[TicketBasicResponse]]
+	tickets: Optional[List[TicketSimpleResponse]]
 
 
 class TicketsByProjectResponse(pg.ResponsePagination):
