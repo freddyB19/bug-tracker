@@ -686,7 +686,7 @@ class TestCommandsProject:
 			Obtener todos los proyectos que posee un usuario
 		"""
 
-		page = 0
+		page = 1
 		pageSize = 3
 		user_id = self.user.id
 
@@ -706,7 +706,7 @@ class TestCommandsProject:
 			de un usuario que no existe.
 		"""
 
-		page = 0
+		page = 1
 		pageSize = 3
 		user_id = 100
 
@@ -743,7 +743,7 @@ class TestCommandsProject:
 			Obtener lista de proyectos pero sin pasar como
 			parametro 'user_id'
 		"""
-		page = 0
+		page = 1
 		pageSize = 3
 
 		projects = commands.command_get_projects_user(
@@ -801,7 +801,7 @@ class TestCommandsProject:
 		self.db.add_all([project1, project2, project3])
 		self.db.commit()
 
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 1
 		search = {"priority": "baja"}
@@ -816,7 +816,7 @@ class TestCommandsProject:
 		assert projects
 		assert len(projects) == 2
 
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 1
 		search = {"priority": "alta"}
@@ -831,7 +831,7 @@ class TestCommandsProject:
 		assert projects
 		assert len(projects) == 1
 
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 1
 		search = {"priority": "normal"}
@@ -846,7 +846,7 @@ class TestCommandsProject:
 		assert projects
 		assert len(projects) == 1
 
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 1
 		search = {"priority": "inmediata"}
@@ -869,7 +869,7 @@ class TestCommandsProject:
 			Obtener todos los proyectos de un usuario pero,
 			aplicando un valor de filtro incorrecto
 		"""
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = self.user.id
 		search = {"priority": "ahora"}
