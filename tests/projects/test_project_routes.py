@@ -934,7 +934,7 @@ class TestRoutesProject:
 		
 		self.headers.update(self.auth)
 
-		page = 0
+		page = 1
 		pageSize = 2
 		user_id = 1
 
@@ -988,7 +988,7 @@ class TestRoutesProject:
 		assert responseJson["content"]["total"] == 3
 		assert len(responseJson["content"]["projects"]) == 2
 
-		page = 1
+		page = 2
 		
 		response = client.get(
 			f"{responseJson['next']}",
@@ -1027,7 +1027,7 @@ class TestRoutesProject:
 		
 		self.headers.update(self.auth)
 
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 1
 
@@ -1195,7 +1195,7 @@ class TestRoutesProject:
 		
 		self.headers.update(self.auth)
 
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 1
 		priority = "ahora"
@@ -1291,7 +1291,7 @@ class TestRoutesProject:
 		assert responseStatus == 200
 		assert responseJson["previous"] is None
 		assert responseJson["next"] is None
-		assert responseJson["current"] == 0
+		assert responseJson["current"] == 1
 		assert responseJson["user"]["id"] == user.id
 		assert responseJson["user"]["name"] == user.name
 		assert responseJson["content"]["total"] == 1
@@ -1345,7 +1345,7 @@ class TestRoutesProject:
 		
 		self.headers.update(self.auth)
 		
-		page = 0
+		page = 1
 		pageSize = 5
 		user_id = 100
 
