@@ -20,6 +20,12 @@ from apps.utils.token.token import validate_authorization
 
 router = APIRouter(prefix = "/ticket")
 
+STATUS_CODE_ERRORS = {
+	400: status.HTTP_400_BAD_REQUEST,
+	401: status.HTTP_401_UNAUTHORIZED,
+	404: status.HTTP_404_NOT_FOUND,
+}
+
 @router.post(
 	"/",
 	status_code = status.HTTP_201_CREATED,
@@ -36,9 +42,11 @@ def create_ticket(ticket: schemas.TicketRequest, token: str = Depends(validate_a
 			state = StateTicketHistory.crear.name
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_400_BAD_REQUEST
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return new_ticket
@@ -55,9 +63,11 @@ def get_ticket(id: int, token: str = Depends(validate_authorization)) -> schemas
 			ticket_id = id
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return ticket
@@ -83,9 +93,12 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 			project_id = project_id
 		)
 		
-		search_filter = ticket_filter.model_dump(exclude_defaults = True, exclude=['page', 'pageSize'])
+		search_filter = ticket_filter.model_dump(
+			exclude_defaults = True, 
+			exclude=['page', 'pageSize']
+		)
 		
-		data_pagination = infoFilter.model_dump(include=['page', 'pageSize'])
+		data_pagination = ticket_filter.model_dump(include=['page', 'pageSize'])
 		
 		tickets = commands.command_get_ticket_by_filter(
 			project_id = project_id,
@@ -94,15 +107,12 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 			pageSize = data_pagination['pageSize'],
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
-
-	search = ticket_filter.model_dump(
-		exclude_defaults = True, 
-		exclude=['page', 'pageSize']
-	)
 	
 	pagination = pg.set_url_pagination(
 		request =  pg.get_url_from_request(request = request),
@@ -110,7 +120,7 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 		total_elements = total_tickets,
 		page = ticket_filter.page,
 		pageSize = ticket_filter.pageSize,
-		params = search 
+		params = search_filter 
 	)
 
 	response = {
