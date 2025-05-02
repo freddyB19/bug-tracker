@@ -1208,26 +1208,26 @@ class TestTicketCommand:
 
 		bulk_insert_ticket(db = self.db)
 
-		tickets_page_0 = commands.command_get_ticket_by_filter(
+		tickets_page_1 = commands.command_get_ticket_by_filter(
 			project_id = project_id 
 		)
 
-		tickets_page_1 = commands.command_get_ticket_by_filter(
+		tickets_page_2 = commands.command_get_ticket_by_filter(
 			project_id = project_id,
-			page = 1
+			page = 2
 		)
 
-		assert tickets_page_0
-		assert len(tickets_page_0) == 10
-
 		assert tickets_page_1
-		assert len(tickets_page_1) == 4
+		assert len(tickets_page_1) == 10
+
+		assert tickets_page_2
+		assert len(tickets_page_2) == 4
 
 
 	@pytest.mark.xfail(reason = "Valores no validos en paginación", raises = (ValueError, ValidationError))
 	@pytest.mark.parametrize("pagination", [
 		{"page": -1, "pageSize": 5},
-		{"page": 0, "pageSize": -1},
+		{"page": 1, "pageSize": -1},
 		{"page": 0.1, "pageSize": 5},
 		{"page": 1, "pageSize": 5.4},
 	])
@@ -1428,7 +1428,7 @@ class TestTicketCommand:
 
 		tickets_page_1 = commands.command_get_tickets_by_project(
 			project_id = project_id,
-			page = 1,
+			page = 2,
 			pageSize = 2
 		)
 
@@ -1446,7 +1446,7 @@ class TestTicketCommand:
 		{"page": -1, "pageSize": 5},
 		{"page": 1, "pageSize": -5},
 		{"page": 0.1, "pageSize": 5},
-		{"page": 0, "pageSize": 5.3}
+		{"page": 1, "pageSize": 5.3}
 	])
 	@patch("apps.tickets.commands.commands.get_db", get_db)
 	def test_get_tickets_by_projects_with_wrong_page_and_pageSize(self, pagination):
