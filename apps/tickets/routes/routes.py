@@ -138,24 +138,28 @@ def get_ticket_by_filter(request: Request, project_id: int, ticket_filter: Annot
 
 
 @router.get(
-	"/search/title",
+	"/project/{project_id}/ticket",
 	status_code = status.HTTP_200_OK,
-	response_model = schemas.TicketSimpleResponse
+	response_model = schemas.SimpleListTickets
 )
-def get_ticket_by_title(ticket: schemas.TicketByTitle, token: str = Depends(validate_authorization)) ->  schemas.TicketSimpleResponse:
+def get_ticket_by_title(project_id: int, ticket: Annotated[schemas.TicketByTitle, Query()], token: str = Depends(validate_authorization)) ->  schemas.SimpleListTickets:
 	try:
 		tickets = commands.command_get_ticket_by_title(
+			project_id = project_id,
 			ticket = ticket
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	response = {
 		"tickets": tickets
 	}
+
 	return response
 
 
