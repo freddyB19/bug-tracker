@@ -164,6 +164,10 @@ class ListTickets(BaseModel):
 	tickets: Optional[List[TicketSimpleResponse]]
 
 
+class SimpleListTickets(BaseModel):
+	tickets: Optional[List[TicketSimpleResponse]]
+
+
 class TicketsByProjectResponse(pg.ResponsePagination):
 	project: ProjectSimpleResponse
 	content: ListTickets
