@@ -1257,12 +1257,15 @@ class TestTicketCommand:
 
 		bulk_insert_ticket(db = self.db)
 
+		project_id = self.project.id
+
 		ticket_title = schemas.TicketByTitle(
 			title = "API"
 		)
 
 		result = commands.command_get_ticket_by_title(
-			ticket = ticket_title
+			ticket = ticket_title,
+			project_id = project_id
 		)
 
 		assert result
@@ -1274,7 +1277,8 @@ class TestTicketCommand:
 		)
 
 		result = commands.command_get_ticket_by_title(
-			ticket = ticket_title_min
+			ticket = ticket_title_min,
+			project_id = project_id
 		)
 
 		assert result
@@ -1291,12 +1295,15 @@ class TestTicketCommand:
 
 		bulk_insert_ticket(db = self.db)
 
+		project_id = self.project.id
+
 		ticket_title = schemas.TicketByTitle(
 			title = "Not found"
 		)
 
 		result = commands.command_get_ticket_by_title(
-			ticket = ticket_title
+			ticket = ticket_title,
+			project_id = project_id
 		)
 
 		assert not result
@@ -1312,6 +1319,8 @@ class TestTicketCommand:
 
 		bulk_insert_ticket(db = self.db)
 
+		project_id = self.project.id
+
 		title = """
 		Lorem ipsum dolor sit amet consectetur adipisicing elit. 
 		Aspernatur, magni nostrum est deserunt officia quas illo quis, 
@@ -1320,7 +1329,8 @@ class TestTicketCommand:
 		"""
 
 		result = commands.command_get_ticket_by_title(
-			ticket = {"title": title}
+			ticket = {"title": title},
+			project_id = project_id
 		)
 
 
@@ -1332,8 +1342,48 @@ class TestTicketCommand:
 			'title'
 		"""
 		bulk_insert_ticket(db = self.db)
+		project_id = self.project.id
 
-		result = commands.command_get_ticket_by_title()
+		result = commands.command_get_ticket_by_title(project_id = project_id)
+
+
+	@pytest.mark.xfail(reason = "Sin 'project_id'", raises = ValidationError)
+	@patch("apps.tickets.commands.commands.get_db", get_db)
+	def test_get_ticket_by_title_without_project_id(self):
+		"""
+			Generar un error al no enviar
+			'project_id'
+		"""
+		bulk_insert_ticket(db = self.db)
+
+		title = "App"
+
+		result = commands.command_get_ticket_by_title(
+			ticket = {"title": title},
+		)
+
+
+	@pytest.mark.xfail(reason = "Valor incorrecto para 'project_id'", raises = ValidationError)
+	@pytest.mark.parametrize("project_id", [
+		"abc12",
+		12.3,
+		None,
+		[1]
+	])
+	@patch("apps.tickets.commands.commands.get_db", get_db)
+	def test_get_ticket_by_title_with_wrong_project_id(self, project_id):
+		"""
+			Generar un error al enviar valores
+			incorrectos para 'project_id'
+		"""
+		bulk_insert_ticket(db = self.db)
+
+		title = "App"
+
+		result = commands.command_get_ticket_by_title(
+			ticket = {"title": title},
+			project_id = project_id
+		)
 
 
 	@patch("apps.tickets.commands.commands.get_db", get_db)
