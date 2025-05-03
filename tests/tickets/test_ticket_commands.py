@@ -12,6 +12,9 @@ from tests import SESSION
 from tests import get_db
 from tests.tickets import set_ticket
 from tests.tickets import set_ticket_schema
+from tests.tickets import insert_projects
+from tests.tickets import insert_ticket_by_project
+from tests.tickets import bulk_insert_ticket
 
 from apps import Model
 from apps.users.models import User
@@ -22,156 +25,6 @@ from apps.tickets.models import ChoicesState
 from apps.tickets.models import ChoicesType
 from apps.tickets.schemas import schemas
 from apps.tickets.commands import commands
-
-
-class TestTicketSchema(BaseModel):
-	title: str
-	priority: Literal["baja", "normal", "alta", "inmediata"] = "normal"
-	state: Literal["nuevo", "desarrollo", "prueba", "repaso", "terminado"] = "nuevo"
-	type: Literal["abierto", "archivado", "cerrado"] = "abierto"
-	description: str | None = None
-	project_id: int = 1
-
-
-def bulk_insert_ticket(db):
-	db.execute(
-	    insert(Ticket),
-	    [
-	        TestTicketSchema(
-	        	title = "Interfaz Grafica"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Formularios"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Confirmación",
-	        	priority = "inmediata"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Tests",
-	        	priority = "inmediata"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Endpoints",
-	        	priority = "alta",
-	        	state = "desarrollo"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Limites de petición",
-	        	priority = "alta",
-	        	state = "desarrollo"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Refactoring",
-	        	state = "repaso"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Validaciones de Login",
-	        	priority = "alta",
-	        	state = "repaso"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Consultas SQL",
-	        	state = "repaso"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Rendimiento de la API",
-	        	priority = "baja",
-	        	state = "repaso"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Tabla Ticket",
-	        	priority = "baja",
-	        	type = "archivado"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Algoritmo de busqueda",
-	        	priority = "baja",
-	        	type = "archivado"
-	        ).model_dump(),
-	        TestTicketSchema(
-	        	title = "Sistema de caching",
-	        	type = "cerrado"
-	        ).model_dump()
-	    ]
-	)
-
-	db.commit()
-
-
-def insert_projects(db):
-	db.execute(
-		insert(Project),
-		[
-			{
-				"title" : "Frontend (Bug tracker)",
-				"description" : "Frontend del proyecto",
-				"user_id" : 1
-			},
-			{
-				"title" : "Diseño UI (Bug tracker)",
-				"description" : "el diseño UI para el proyecto",
-				"user_id" : 1
-			},
-			{
-				"title" : "Diagrama de la DB (Bug tracker)",
-				"description" : "Diagrama de la DB para el proyecto",
-				"user_id" : 1
-			},
-			{
-				"title" : "Documentación (Bug tracker)",
-				"description" : "Crear la documentación para el proyecto",
-				"user_id" : 1
-			},
-
-		]
-	)
-
-	db.commit()
-
-
-def insert_ticket_by_project(db):
-	
-	db.execute(
-		insert(Ticket),
-		[
-			set_ticket_schema(
-				project_id = 1, 
-				title = "Tests para la DB", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 2, 
-				title = "Función para consumir API", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 2, 
-				title = "Validación de formularios", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 2, 
-				title = "Vistas", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 3, 
-				title = "Apariencia de formularios", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 3, 
-				title = "Colores de las páginas", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 4, 
-				title = "Relaciones de tablas", 
-			).model_dump(),
-			set_ticket_schema(
-				project_id = 5, 
-				title = "Documentar progreso", 
-			).model_dump(),
-		]
-	)
-
-	db.commit()
-
 
 
 class TestTicketCommand:
