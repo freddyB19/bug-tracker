@@ -158,11 +158,12 @@ def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, p
 	return tickets.all()
 
 @validate_call
-def command_get_ticket_by_title(ticket: schemas.TicketByTitle) -> Optional[List[Ticket]]:
+def command_get_ticket_by_title(project_id: int, ticket: schemas.TicketByTitle) -> Optional[List[Ticket]]:
 	db = next(get_db())
 
 	sql = (
 		select(Ticket)
+		.where(Ticket.project_id == project_id)
 		.where(
 			Ticket.title.ilike(f"%{ticket.title}%")
 		)
