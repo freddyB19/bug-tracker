@@ -1,7 +1,6 @@
 from typing import List
 from typing import Dict
 
-
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
@@ -22,6 +21,10 @@ from .utils.error_messages import (
 )
 
 from apps.users.commands.utils.error_messages import DoesNotExistsUser
+
+from apps.utils.pagination.pagination import calculate_start_pagination
+from apps.utils.pagination.pagination import PageDefault
+from apps.utils.pagination.pagination import PageSizeDefault
 
 CHOICES:list = [choice.name for choice in ChoicesPrority]
 
@@ -107,13 +110,13 @@ def command_delete_project(project_id: int) -> None:
 	db.commit()
 
 @validate_call
-def command_get_projects_user(user_id: int, search: Dict[str, str] = {}, page: int = 0, pageSize: int = 1) -> List[Project]:
+def command_get_projects_user(user_id: int, search: Dict[str, str] = {}, page: int = PageDefault, pageSize: int = PageSizeDefault) -> List[Project]:
 	db = next(get_db())
 
 	if "priority" in search and search["priority"] not in CHOICES:
 		raise ValueError(InvalidPriority.get(choices = CHOICES), 400)
 
-	start = page * pageSize
+	start = calculate_start_pagination(page = page, pageSize = pageSize)
 
 	filter_search = search
 	
