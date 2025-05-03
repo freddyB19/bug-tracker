@@ -30,6 +30,10 @@ from apps.tickets.schemas import schemas
 from apps.projects.models.model import Project
 from apps.projects.commands.utils.error_messages import DoesNotExistsProject
 
+from apps.utils.pagination.pagination import calculate_start_pagination
+from apps.utils.pagination.pagination import PageDefault
+from apps.utils.pagination.pagination import PageSizeDefault
+
 @validate_call
 def command_add_ticket_history(ticket_id: int, state: str = StateTicketHistory.crear.name, infoTicket: Dict[str, str | int ] = None) -> TicketHistory:
 	db = next(get_db())
@@ -126,7 +130,7 @@ def command_get_total_tickets_filter(project_id: int, search: Dict[str, str] = {
 	return total
 
 @validate_call
-def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, page: int = 1, pageSize: int = 10) -> Optional[List[Ticket]]:
+def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, page: int = PageDefault, pageSize: int = PageSizeDefault) -> Optional[List[Ticket]]:
 	db = next(get_db())
 
 	if "type" in search and not utils.validate_choice(choice = search["type"], options = ChoicesType):
@@ -141,7 +145,7 @@ def command_get_ticket_by_filter(project_id: int, search: Dict[str, str] = {}, p
 
 	data_search = search.copy()
 
-	start = (page - 1) * pageSize
+	start = calculate_start_pagination(page = page, pageSize = pageSize)
 
 	data_search.update({
 		"project_id": project_id
@@ -209,13 +213,13 @@ def command_delete_ticket(ticket_id: int) -> None:
 	db.commit()
 
 @validate_call
-def command_get_tickets_by_project(project_id: int, page: int = 0, pageSize: int = 10) -> Optional[List[Ticket]]:
+def command_get_tickets_by_project(project_id: int, page: int = PageDefault, pageSize: int = PageSizeDefault) -> Optional[List[Ticket]]:
 	db = next(get_db())
 
 	if page < 0 or pageSize < 0:
 		raise ValueError(PaginationError.get(), 400)
 
-	start = page * pageSize
+	start = calculate_start_pagination(page = page, pageSize = pageSize)
 
 	sql = (
 		select(Ticket)
@@ -242,7 +246,6 @@ def command_get_total_tickets_project(project_id: int) -> int:
 	
 	return total
 
-
 @validate_call
 def command_get_total_ticket_histories(ticket_id: int) -> int:
 	db = next(get_db())
@@ -257,15 +260,14 @@ def command_get_total_ticket_histories(ticket_id: int) -> int:
 
 	return total
 
-
 @validate_call
-def command_get_ticket_histories(ticket_id: int, page: int = 0, pageSize: int = 10) -> Optional[TicketHistory]:
+def command_get_ticket_histories(ticket_id: int, page: int = PageDefault, pageSize: int = PageSizeDefault) -> Optional[TicketHistory]:
 	db = next(get_db())
 
 	if page < 0 or pageSize < 0:
 		raise ValueError(PaginationError.get(), 400)
 
-	start = page * pageSize
+	start = calculate_start_pagination(page = page, pageSize = pageSize)
 
 	sql = (
 		select(TicketHistory)
