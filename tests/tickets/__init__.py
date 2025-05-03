@@ -4,6 +4,8 @@ from sqlalchemy import insert
 
 from pydantic import BaseModel
 
+from apps.projects.models import Project
+
 from apps.tickets.models import Ticket
 from apps.tickets.models import ChoicesType
 from apps.tickets.models import ChoicesState
@@ -155,6 +157,80 @@ def bulk_insert_ticket_multiple_projects(db):
 	        	priority = "alta",
 	        	state = "desarrollo"
 	        ).model_dump(),
+		]
+	)
+
+	db.commit()
+
+
+def insert_projects(db):
+	db.execute(
+		insert(Project),
+		[
+			{
+				"title" : "Frontend (Bug tracker)",
+				"description" : "Frontend del proyecto",
+				"user_id" : 1
+			},
+			{
+				"title" : "Diseño UI (Bug tracker)",
+				"description" : "el diseño UI para el proyecto",
+				"user_id" : 1
+			},
+			{
+				"title" : "Diagrama de la DB (Bug tracker)",
+				"description" : "Diagrama de la DB para el proyecto",
+				"user_id" : 1
+			},
+			{
+				"title" : "Documentación (Bug tracker)",
+				"description" : "Crear la documentación para el proyecto",
+				"user_id" : 1
+			},
+
+		]
+	)
+
+	db.commit()
+
+
+def insert_ticket_by_project(db):
+	
+	db.execute(
+		insert(Ticket),
+		[
+			set_ticket_schema(
+				project_id = 1, 
+				title = "Tests para la DB", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 2, 
+				title = "Función para consumir API", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 2, 
+				title = "Validación de formularios", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 2, 
+				title = "Vistas", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 3, 
+				title = "Apariencia de formularios", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 3, 
+				title = "Colores de las páginas", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 4, 
+				title = "Relaciones de tablas", 
+			).model_dump(),
+			set_ticket_schema(
+				project_id = 5, 
+				title = "Documentar progreso", 
+			).model_dump(),
 		]
 	)
 
