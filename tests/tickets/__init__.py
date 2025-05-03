@@ -121,3 +121,41 @@ def bulk_insert_ticket(db):
 	)
 
 	db.commit()
+
+
+def bulk_insert_ticket_multiple_projects(db):
+	db.execute(
+		insert(Ticket),
+		[
+			CreateTicket(
+	        	title = "Interfaz Grafica",
+	        	project_id = 2
+	        ).model_dump(),
+	        CreateTicket(
+	        	title = "Formularios",
+	        	project_id = 2
+	        ).model_dump(),
+	        CreateTicket(
+	        	title = "Confirmación",
+	        	priority = "inmediata"
+	        ).model_dump(),
+	        CreateTicket(
+	        	title = "Tests de la API",
+	        	project_id = 2,
+	        	priority = "inmediata"
+	        ).model_dump(),
+	        CreateTicket(
+	        	title = "API de los Endpoints",
+	        	priority = "alta",
+	        	state = "desarrollo",
+	        	project_id = 2,
+	        ).model_dump(),
+	        CreateTicket(
+	        	title = "Limites de petición",
+	        	priority = "alta",
+	        	state = "desarrollo"
+	        ).model_dump(),
+		]
+	)
+
+	db.commit()
