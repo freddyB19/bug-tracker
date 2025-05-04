@@ -18,6 +18,7 @@ from .utils.error_messages import (
 	DoesNotExistsTicket,
 	PaginationError,
 	DoesNotExistsTicketHistory,
+	EmptyValues,
 )
 from apps.tickets.models import Ticket
 from apps.tickets.models import TicketHistory
@@ -188,6 +189,9 @@ def command_update_ticket(ticket_id: int, infoUpdate: schemas.TicketUpdate) -> T
 		raise ValueError(InvalidPriority.get(), 400)
 
 	update_values = infoUpdate.model_dump(exclude_defaults = True)
+
+	if not update_values:
+		raise ValueError(EmptyValues.get(), 400)
 
 	sql = (
 		update(Ticket)
