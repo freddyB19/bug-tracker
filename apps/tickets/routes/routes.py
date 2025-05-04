@@ -204,9 +204,11 @@ def delete_ticket(id: int, token: str = Depends(validate_authorization)) -> None
 			ticket_id = id
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 @router.get(
