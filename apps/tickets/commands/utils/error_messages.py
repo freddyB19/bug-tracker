@@ -49,3 +49,10 @@ class InvalidStateTicketHistory:
 	@validate_call(config = ConfigDict(hide_input_in_errors = True))
 	def get(cls, state: str) -> str:
 		return f"TicketHistory: 'state' invalido = {state}"
+
+
+class EmptyValues:
+	@classmethod
+	@validate_call(config = ConfigDict(hide_input_in_errors = True))
+	def get(cls) -> str:
+		return "No puede enviar valores vacios para la actualización"
