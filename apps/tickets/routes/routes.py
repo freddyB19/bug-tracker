@@ -184,9 +184,11 @@ def update_ticket(id: int, ticket: schemas.TicketUpdate, token: str = Depends(va
 		)
 
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return ticket
