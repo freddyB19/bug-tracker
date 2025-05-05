@@ -1,6 +1,8 @@
 from typing import Literal
 
 from sqlalchemy import insert
+from sqlalchemy import update
+
 
 from pydantic import BaseModel
 
@@ -10,8 +12,11 @@ from apps.tickets.models import Ticket
 from apps.tickets.models import ChoicesType
 from apps.tickets.models import ChoicesState
 from apps.tickets.models import ChoicesPrority
-
+from apps.tickets.models import TicketHistory
+from apps.tickets.models import StateTicketHistory
 from apps.tickets.schemas import schemas
+from apps.tickets.commands.utils.utils import set_message_ticket_history
+
 
 TYPE = [choice.name for choice in ChoicesType]
 STATE = [choice.name for choice in ChoicesState]
@@ -231,6 +236,51 @@ def insert_ticket_by_project(db):
 				project_id = 5, 
 				title = "Documentar progreso", 
 			).model_dump(),
+		]
+	)
+
+	db.commit()
+
+
+def create_ticket_histories(db, ticket_id: int = 1):
+	db.execute(
+		insert(TicketHistory),
+		[
+			{
+				"ticket_id": ticket_id,
+				"state": StateTicketHistory.crear.name,
+				"message": set_message_ticket_history(
+					ticket_id = ticket_id, 
+					state = StateTicketHistory.crear.name, 
+				)
+			},
+			{
+				"ticket_id": ticket_id,
+				"state": StateTicketHistory.actualizar.name,
+				"message": set_message_ticket_history(
+					ticket_id = ticket_id, 
+					state = StateTicketHistory.actualizar.name,
+					data = {"state": "desarrollo", "priority": "alta"}
+				)
+			},
+			{
+				"ticket_id": ticket_id,
+				"state": StateTicketHistory.actualizar.name,
+				"message": set_message_ticket_history(
+					ticket_id = ticket_id, 
+					state = StateTicketHistory.actualizar.name,
+					data = {"state": "prueba"}
+				)
+			},
+			{
+				"ticket_id": ticket_id,
+				"state": StateTicketHistory.actualizar.name,
+				"message": set_message_ticket_history(
+					ticket_id = ticket_id, 
+					state = StateTicketHistory.actualizar.name,
+					data = {"title": "Formato del CSS"}
+				)
+			},
 		]
 	)
 
