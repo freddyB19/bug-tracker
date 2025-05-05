@@ -9,15 +9,15 @@ from tests import ENGINE
 from tests import SESSION
 from tests import get_db
 from tests.tickets import set_ticket
+from tests.tickets import create_ticket_histories
 
 from apps import Model
 from apps.users.models import User
 from apps.projects.models import Project
 from apps.tickets.models import Ticket
 from apps.tickets.commands import commands
-from apps.tickets.models import TicketHistory
 from apps.tickets.models import StateTicketHistory
-from apps.tickets.commands.utils.utils import set_message_ticket_history
+
 
 def create_ticket(db, project_id: int = 1):
 	ticket = set_ticket(project_id = project_id)
@@ -43,49 +43,49 @@ def update_ticket(db, ticket_id: int = 1, values:dict = {}):
 	return ticket
 
 
-def create_ticket_histories(db, ticket_id: int = 1):
-	db.execute(
-		insert(TicketHistory),
-		[
-			{
-				"ticket_id": ticket_id,
-				"state": StateTicketHistory.crear.name,
-				"message": set_message_ticket_history(
-					ticket_id = ticket_id, 
-					state = StateTicketHistory.crear.name, 
-				)
-			},
-			{
-				"ticket_id": ticket_id,
-				"state": StateTicketHistory.actualizar.name,
-				"message": set_message_ticket_history(
-					ticket_id = ticket_id, 
-					state = StateTicketHistory.actualizar.name,
-					data = {"state": "desarrollo", "priority": "alta"}
-				)
-			},
-			{
-				"ticket_id": ticket_id,
-				"state": StateTicketHistory.actualizar.name,
-				"message": set_message_ticket_history(
-					ticket_id = ticket_id, 
-					state = StateTicketHistory.actualizar.name,
-					data = {"state": "prueba"}
-				)
-			},
-			{
-				"ticket_id": ticket_id,
-				"state": StateTicketHistory.actualizar.name,
-				"message": set_message_ticket_history(
-					ticket_id = ticket_id, 
-					state = StateTicketHistory.actualizar.name,
-					data = {"title": "Formato del CSS"}
-				)
-			},
-		]
-	)
+# def create_ticket_histories(db, ticket_id: int = 1):
+# 	db.execute(
+# 		insert(TicketHistory),
+# 		[
+# 			{
+# 				"ticket_id": ticket_id,
+# 				"state": StateTicketHistory.crear.name,
+# 				"message": set_message_ticket_history(
+# 					ticket_id = ticket_id, 
+# 					state = StateTicketHistory.crear.name, 
+# 				)
+# 			},
+# 			{
+# 				"ticket_id": ticket_id,
+# 				"state": StateTicketHistory.actualizar.name,
+# 				"message": set_message_ticket_history(
+# 					ticket_id = ticket_id, 
+# 					state = StateTicketHistory.actualizar.name,
+# 					data = {"state": "desarrollo", "priority": "alta"}
+# 				)
+# 			},
+# 			{
+# 				"ticket_id": ticket_id,
+# 				"state": StateTicketHistory.actualizar.name,
+# 				"message": set_message_ticket_history(
+# 					ticket_id = ticket_id, 
+# 					state = StateTicketHistory.actualizar.name,
+# 					data = {"state": "prueba"}
+# 				)
+# 			},
+# 			{
+# 				"ticket_id": ticket_id,
+# 				"state": StateTicketHistory.actualizar.name,
+# 				"message": set_message_ticket_history(
+# 					ticket_id = ticket_id, 
+# 					state = StateTicketHistory.actualizar.name,
+# 					data = {"title": "Formato del CSS"}
+# 				)
+# 			},
+# 		]
+# 	)
 
-	db.commit()
+# 	db.commit()
 
 class TestTicketHistoryCommand:
 
