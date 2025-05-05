@@ -211,59 +211,6 @@ def delete_ticket(id: int, token: str = Depends(validate_authorization)) -> None
 			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
-@router.get(
-	"/list/project/",
-	status_code = status.HTTP_200_OK,
-	response_model = schemas.TicketsByProjectResponse
-)
-def get_tickets_by_project(request: Request, query: Annotated[schemas.TicketPagination, Query()], token: str = Depends(validate_authorization)) -> schemas.TicketsByProjectResponse:
-
-	try:
-		project = c_projects.command_get_project(
-			project_id = query.project_id
-		)
-		
-		total_tickets = commands.command_get_total_tickets_project(
-			project_id = query.project_id,
-		)
-		
-		tickets = commands.command_get_tickets_by_project(
-			project_id = query.project_id,
-			page = query.page,
-			pageSize = query.pageSize,
-		)
-	except ValueError as e:
-		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
-		)
-
-
-	pagination = pg.set_url_pagination(
-		request = pg.get_url_from_request(request = request),
-		elements = tickets,
-		total_elements = total_tickets,
-		page = query.page,
-		pageSize = query.pageSize,
-		params = {
-			"project_id": query.project_id
-		}
-	)
-
-
-	response = {
-		"previous": pagination.get("previous"),
-		"current": query.page,
-		"next": pagination.get("next"),
-		"project": project,
-		"content": {
-			"total": total_tickets,
-			"tickets": tickets
-		}
-	}
-
-	return response
-
 
 @router.get(
 	"/{id}/history",
