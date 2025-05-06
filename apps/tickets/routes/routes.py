@@ -233,9 +233,11 @@ def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.
 			pageSize = query.pageSize,
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 
