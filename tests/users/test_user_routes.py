@@ -91,7 +91,6 @@ class TestRouterUser:
 		set_user_schema(username = "bol19"),
 		set_user_schema(email = "bol19@data.com")
 	])
-
 	@patch("apps.users.commands.commands.get_db", get_db)
 	def test_create_user_with_an_existing_email_or_username(self, data_user):
 		""" Validar que no se cree un usuario con un email o username ya registrado """
@@ -201,7 +200,6 @@ class TestRouterUser:
 		assert resultStatus == 204
 
 
-
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_delete_user_does_not_exists(self, mockToken):
@@ -219,7 +217,6 @@ class TestRouterUser:
 
 		resultStatus = response.status_code
 		resultJson = response.json()
-
 
 		assert resultStatus == 404
 		assert resultJson == {"message": DoesNotExistsUser.get(id = user_id)}
@@ -349,7 +346,6 @@ class TestRouterUser:
 
 		assert resultStatus == 409
 		assert resultJson == {"message": EmailAlreadyExists.get(email = infoUdate.email)}
-
 
 
 	@patch("apps.users.commands.commands.get_db", get_db)
@@ -715,7 +711,6 @@ class TestRouterUser:
 			Intentar actualizar el 'username' pero ingresando
 			credenciales invalidas
 		"""
-
 		mockToken.result_value.state.result_value = True
 
 		user_id = 1
@@ -738,6 +733,39 @@ class TestRouterUser:
 
 		assert resultStatus == 401
 		assert resultJson == {"message": InvalidCredentials.get()}
+
+
+	@pytest.mark.parametrize("update_user", [
+		{"username": "you", "password": "12345"},
+		{"username": """Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+		Aspernatur, magni nostrum est deserunt officia quas illo quis, 
+		aliquam unde animi quod debitis voluptates recusandae ut minima, 
+		eos dicta molestiae accusamus?""", "password": "12345"},
+	])
+	@patch("apps.users.commands.commands.get_db", get_db)
+	@patch("apps.utils.token.token.verify_token")
+	def test_update_username_user_with_wrong_value_username(self, mockToken, update_user):
+		"""
+			Intentar actualizar el 'username' pero,
+			enviado un valor muy largo o muy corto
+		"""
+		mockToken.result_value.state.result_value = True
+
+		user_id = 1
+
+		self.headers.update(self.auth)
+
+		response = client.put(
+			f"{self.url}/{user_id}/username", 
+			headers = self.headers,
+			json=update_user
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 422
+		assert resultJson["message"] == "La logitud debe ser entre 4 y 20 caracteres en (username)"
 
 
 	@patch("apps.users.commands.commands.get_db", get_db)
@@ -875,5 +903,3 @@ class TestRouterUser:
 
 		assert resultStatus == 401
 		assert resultJson == {"message": InvalidCredentials.get()}
-
-
