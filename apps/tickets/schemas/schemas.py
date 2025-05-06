@@ -195,7 +195,9 @@ class TicketsHistorySimpleResponse(TicketsHistorySchema):
 
 
 class TicketsHistoryResponse(TicketsHistorySchema):
-	ticket: TicketBasicResponse
+	ticket: TicketSimpleResponse
+	state: HistoryTicketStateStrField
+	
 
 
 class ListTicketsHistory(BaseModel):
