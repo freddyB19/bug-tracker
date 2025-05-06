@@ -98,7 +98,7 @@ class UserPassword(BaseModel):
 
 
 class UserUsername(BaseModel):
-	username: str
+	username: LenStringField
 	password: str
 
 class UserUsernameResponse(BaseModel):
