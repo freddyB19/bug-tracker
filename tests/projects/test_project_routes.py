@@ -1,16 +1,17 @@
 import pytest
 from unittest.mock import patch
 
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from tests import ENGINE
 from tests import get_db
 from tests import SESSION
+from tests.projects import set_project
+from tests.projects import set_project_schema
 
+from main import app
 from apps import Model
 from apps.users.models import User
-from apps.projects.routes import router
 from apps.projects.models import Project
 from apps.projects.schemas import schemas
 from apps.projects.models import ChoicesPrority
@@ -23,39 +24,14 @@ from apps.projects.commands.utils.error_messages import (
 
 from apps.users.commands.utils.error_messages import DoesNotExistsUser
 
-app = FastAPI()
 
-app.include_router(router)
+ResponseNoToken = {"detail": "Ausencia del token en la cabecera"}
+TokenExpirado = {
+	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+}
+ResponseTokenNoValido = {"detail": "Token no valido"}
 
 client = TestClient(app)
-
-CHOICES = [choice.name for choice in ChoicesPrority]
-
-def set_project(title = None, description = None, priority = None, user_id = None):
-	set_title = title if title else "Proyecto de tests"
-	set_description = description if description else "Proyecto para hacer tests"
-	set_priority = priority if priority in CHOICES else ChoicesPrority.normal.name
-	set_user_id = user_id if user_id else 1
-
-	return Project(
-		title = set_title,
-		description = set_description,
-		priority = set_priority,
-		user_id = set_user_id
-	)
-
-def set_project_schema(title = None, description = None, priority = None, user_id = None):
-	set_title = title if title else "Proyecto de tests"
-	set_description = description if description else "Proyecto para hacer tests"
-	set_priority = priority if priority in CHOICES else ChoicesPrority.normal.name
-	set_user_id = user_id if user_id else 1
-
-	return schemas.ProjectRequest(
-		title = set_title,
-		description = set_description,
-		priority = set_priority,
-		user_id = set_user_id
-	)
 
 
 class TestRoutesProject:
@@ -101,7 +77,6 @@ class TestRoutesProject:
 			Validar que se hayan guradado los datos en la DB
 		"""
 		assert self.db.query(Project).count() == 1
-
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
@@ -386,10 +361,10 @@ class TestRoutesProject:
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
-	def test_route_create_project_without_param_user_id(self, mockToken):
+	def test_route_create_project_without_user_id(self, mockToken):
 		"""
-			Intentar crear proyecto con el ID de un usuario
-			que no existe
+			Intentar crear proyecto pero sin enviar 
+			el ID de un usuario
 		"""
 		mockToken.result_value.state.result_value = True
 		
@@ -408,6 +383,58 @@ class TestRoutesProject:
 		responseStatus = response.status_code
 
 		assert responseStatus == 422
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_create_project_without_authorization(self):
+		"""
+			Intentar crear proyecto, pero sin un token
+			de autenticación
+		"""
+		project = set_project_schema(
+			title = "Proyecto App a",
+			description = "Una app movil",
+			user_id = self.user.id
+		)
+
+		response = client.post(
+			f"{self.url}",
+			headers = self.headers,
+			json = project.model_dump()
+		)
+		
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseNoToken
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_create_project_with_token_expired(self):
+		"""
+			Intentar crear proyecto, pero con un token
+			expirado
+		"""
+		self.headers.update(TokenExpirado)
+
+		project = set_project_schema(
+			title = "Proyecto App a",
+			description = "Una app movil",
+			user_id = self.user.id
+		)
+
+		response = client.post(
+			f"{self.url}",
+			headers = self.headers,
+			json = project.model_dump()
+		)
+		
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseTokenNoValido
+
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
@@ -462,6 +489,47 @@ class TestRoutesProject:
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_get_project_by_id_without_authorization(self):
+		"""
+			Intentar obtener un proyecto, pero sin
+			enviar un token de autorización
+		"""
+		project_id = self.project.id
+
+		response = client.get(
+			f"{self.url}/{project_id}",
+			headers = self.headers,
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+
+		assert responseStatus == 401
+		assert responseJson == ResponseNoToken
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_get_project_by_id_with_token_expired(self):
+		"""
+			Intentar obtener un proyecto, pero
+			envinado un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+		project_id = self.project.id
+
+		response = client.get(
+			f"{self.url}/{project_id}",
+			headers = self.headers,
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+		
+		assert responseStatus == 401
+		assert responseJson == ResponseTokenNoValido
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_route_update_project(self, mockToken):
 		"""
@@ -498,7 +566,6 @@ class TestRoutesProject:
 		assert responseJson["title"] == infoUpdate.title
 		assert responseJson["description"] == infoUpdate.description
 		assert responseJson["priority"] == infoUpdate.priority
-
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
@@ -772,6 +839,7 @@ class TestRoutesProject:
 
 		assert responseStatus == 422
 
+
 	@patch("apps.projects.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_route_update_project_with_only_priority(self, mockToken):
@@ -801,7 +869,6 @@ class TestRoutesProject:
 		assert responseJson["priority"] != self.project.priority.name
 		assert responseJson["title"] == self.project.title
 		assert responseJson["description"] == self.project.description
-
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
@@ -882,6 +949,63 @@ class TestRoutesProject:
 
 
 	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_update_project_without_authorization(self):
+		"""
+			Intentar actualizar un proyecto, pero sin 
+			enviar un token de autorización
+		"""
+		project_id = 1
+
+		infoUpdate = schemas.ProjectUpdate(
+			title = "Actualizando el titulo",
+			description = "Actualizando el la descripción",
+			user_id = self.user.id,
+			priority = "baja"
+		)
+
+		response = client.put(
+			f"{self.url}/{project_id}",
+			headers = self.headers,
+			json = infoUpdate.model_dump()
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseNoToken
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_update_project_with_token_expired(self):
+		"""
+			Intentar actualizar un proyecto, pero
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+		project_id = 1
+
+		infoUpdate = schemas.ProjectUpdate(
+			title = "Actualizando el titulo",
+			description = "Actualizando el la descripción",
+			user_id = self.user.id,
+			priority = "baja"
+		)
+
+		response = client.put(
+			f"{self.url}/{project_id}",
+			headers = self.headers,
+			json = infoUpdate.model_dump()
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseTokenNoValido
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_route_delete_project(self, mockToken):
 		"""
@@ -923,6 +1047,48 @@ class TestRoutesProject:
 
 		assert responseStatus == 404
 		assert responseJson == {"message": DoesNotExistsProject.get(id = project_id)}
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_delete_project_without_authorization(self):
+		"""
+			Intentar eliminar un proyecto, pero sin
+			un token de autenticación
+		"""
+		project_id = 1
+
+		response = client.delete(
+			f"{self.url}/{project_id}",
+			headers = self.headers,
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseNoToken
+
+
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_delete_project_with_token_expired(self):
+		"""
+			Intentar eliminar un proyecto, pero
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+		project_id = 1
+
+		response = client.delete(
+			f"{self.url}/{project_id}",
+			headers = self.headers,
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseTokenNoValido
+
 
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.projects.commands.commands.get_db", get_db)
@@ -1218,7 +1384,6 @@ class TestRoutesProject:
 		assert responseStatus == 422
 		
 
-
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.projects.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
@@ -1259,6 +1424,7 @@ class TestRoutesProject:
 		assert responseJson["user"]["name"] == user.name
 		assert responseJson["content"]["total"] == 1
 		assert len(responseJson["content"]["projects"]) == 0
+
 
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.projects.commands.commands.get_db", get_db)
@@ -1365,3 +1531,85 @@ class TestRoutesProject:
 		assert responseStatus == 404
 		assert responseJson == {"message": DoesNotExistsUser.get(id = user_id)}
 
+	@patch("apps.users.commands.commands.get_db", get_db)
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_get_projects_by_user_without_authorization(self):
+		"""
+			Obtener proyectos por usuario, pero
+			sin enviar un token de autorización
+		"""
+		user_id = 1
+
+		proyecto_b = set_project(
+			title = "Proyecto B",
+			description = "Descripción del proyecto B",
+			user_id = user_id
+		)
+
+		proyecto_c = set_project(
+			title = "Proyecto C",
+			description = "Descripción del proyecto C",
+			user_id = user_id
+		)
+
+		self.db.add_all([proyecto_b, proyecto_c])
+		self.db.commit()
+
+		user = self.db.get(User, user_id)
+
+		response = client.get(
+			f"{self.url}/list/user",
+			headers = self.headers,
+			params = {
+				"user_id": user_id
+			}
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseNoToken
+
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	@patch("apps.projects.commands.commands.get_db", get_db)
+	def test_route_get_projects_by_user_with_token_expired(self):
+		"""
+			Obtener proyectos por usuario, pero
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+
+		user_id = 1
+
+		proyecto_b = set_project(
+			title = "Proyecto B",
+			description = "Descripción del proyecto B",
+			user_id = user_id
+		)
+
+		proyecto_c = set_project(
+			title = "Proyecto C",
+			description = "Descripción del proyecto C",
+			user_id = user_id
+		)
+
+		self.db.add_all([proyecto_b, proyecto_c])
+		self.db.commit()
+
+		user = self.db.get(User, user_id)
+
+		response = client.get(
+			f"{self.url}/list/user",
+			headers = self.headers,
+			params = {
+				"user_id": user_id
+			}
+		)
+
+		responseStatus = response.status_code
+		responseJson = response.json()
+
+		assert responseStatus == 401
+		assert responseJson == ResponseTokenNoValido
