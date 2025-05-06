@@ -269,15 +269,17 @@ def get_ticket_history_by_ticket(request: Request, id: int, query: Annotated[pg.
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.TicketsHistoryResponse
 )
-def get_detail_ticket_history(id: int, token: str = Depends(validate_authorization)) -> schemas.TicketsHistoryResponse:
+def get_ticket_history(id: int, token: str = Depends(validate_authorization)) -> schemas.TicketsHistoryResponse:
 	try:
 		history = commands.command_get_detail_ticket_history(
 			history_id = id
 		)
 	except ValueError as e:
+		message, status_code = e.args
+		
 		return JSONResponse(
-			content = {"message": str(e)},
-			status_code = status.HTTP_404_NOT_FOUND
+			content = {"message": message},
+			status_code = STATUS_CODE_ERRORS[status_code]
 		)
 
 	return history
