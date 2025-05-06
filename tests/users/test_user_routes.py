@@ -1,18 +1,18 @@
 import pytest
 from  unittest.mock import patch
 
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from tests import ENGINE
 from tests import SESSION
 from tests import get_db
+from tests.users import set_new_user
+from tests.users import set_user_schema
 
+from main import app
 from apps import Model
 from apps.users.models import User
-from apps.users.routes import router
 from apps.users.schemas import schemas
-from apps.users.commands.utils.password import HashPassword
 from apps.users.commands.utils.password import ValidateHashedPassword
 from apps.users.commands.utils.error_messages import (
 	EmailORUsernameInvalid,
@@ -26,48 +26,13 @@ from apps.users.commands.utils.error_messages import (
 	SerializerUser
 )
 
-
-app = FastAPI()
-
-app.include_router(router)
+ResponseNoToken = {"detail": "Ausencia del token en la cabecera"}
+TokenExpirado = {
+	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+}
+ResponseTokenNoValido = {"detail": "Token no valido"}
 
 client = TestClient(app)
-
-
-NAME = "Freddy"
-EMAIL = "freddy19@gmail.com"
-USERNAME = "freddy19"
-PASSWORD = "12345"
-
-def set_new_user(name: str = None, email: str = None, username: str = None, password: str = None) -> User:
-	set_name = name if name is not None else NAME
-	set_email = email if email is not None else EMAIL
-	set_username = username if username is not None else USERNAME
-	set_password = password if password is not None else PASSWORD
-
-	return User(
-		name = set_name,
-		username = set_username,
-		email = set_email,
-		password = HashPassword.getHash(password = set_password),
-	)
-
-
-def set_user_schema(name: str = None, email: str = None, username: str = None, password: str = None) -> schemas.UserRequest:
-	set_name = name if name is not None else NAME
-	set_email = email if email is not None else EMAIL
-	set_username = username if username is not None else USERNAME
-	set_password = password if password is not None else PASSWORD
-	set_password_repeat = set_password
-
-
-	return schemas.UserRequest(
-		name = set_name,
-		username = set_username ,
-		email = set_email,
-		password = set_password,
-		password_repeat = set_password_repeat
-	)
 
 class TestRouterUser:
 
@@ -86,13 +51,13 @@ class TestRouterUser:
 		self.headers = {"Content-Type": "application/json"}
 		self.auth = {"Authorization": "Bearer token-key"}
 
+		self.user = user
 
 	def teardown_method(self):
 		self.db.rollback()
 		self.db.close()
 
 
-	@patch("apps.users.commands.commands.User", User)
 	@patch("apps.users.commands.commands.get_db", get_db)
 	def test_create_user(self):
 		""" Validando ruta para crear un usuario"""
@@ -126,7 +91,7 @@ class TestRouterUser:
 		set_user_schema(username = "bol19"),
 		set_user_schema(email = "bol19@data.com")
 	])
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	def test_create_user_with_an_existing_email_or_username(self, data_user):
 		""" Validar que no se cree un usuario con un email o username ya registrado """
@@ -144,7 +109,7 @@ class TestRouterUser:
 		assert resultJson == {"message": EmailORUsernameInvalid.get()}
 
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_get_user_by_id(self, mockToken):
@@ -167,7 +132,7 @@ class TestRouterUser:
 		assert resultJson['username'] == user.username
 		assert resultJson['email'] == user.email
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_get_user_does_not_exists(self, mockToken):
@@ -188,7 +153,38 @@ class TestRouterUser:
 		assert resultJson == {"message": DoesNotExistsUser.get(id = user_id)}
 
 
-	@patch("apps.users.commands.commands.User", User)
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_get_user_by_id_without_authorization(self):
+		"""
+			Obtener información de un usuario, pero
+			sin enviar un token de autenticación
+		"""
+		response = client.get(f"{self.url}/{1}", headers = self.headers)
+
+		resultJson = response.json()
+		resultStatus = response.status_code
+
+		assert resultStatus == 401
+		assert resultJson == ResponseNoToken
+
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_get_user_by_id_with_expired_token(self):
+		"""
+			Obtener información de un usuario, pero
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+		
+		response = client.get(f"{self.url}/{1}", headers = self.headers)
+
+		resultJson = response.json()
+		resultStatus = response.status_code
+
+		assert resultStatus == 401
+		assert resultJson == ResponseTokenNoValido
+
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_delete_user(self, mockToken):
@@ -205,11 +201,14 @@ class TestRouterUser:
 		assert resultStatus == 204
 
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_delete_user_does_not_exists(self, mockToken):
-		""" """
+		"""
+			Intenar eliminar un usuario, pero
+			con un ID que no existe
+		"""
 
 		mockToken.result_value.state.result_value = True
 		self.headers.update(self.auth)
@@ -226,7 +225,41 @@ class TestRouterUser:
 		assert resultJson == {"message": DoesNotExistsUser.get(id = user_id)}
 
 
-	@patch("apps.users.commands.commands.User", User)
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_delete_user_without_authorization(self):
+		"""
+			Intenar eliminar un usuario, pero
+			sin enviar un token de autorización
+		"""
+		user_id = 1
+
+		response = client.delete(f"{self.url}/{user_id}", headers = self.headers)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseNoToken
+
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_delete_user_with_token_expired(self):
+		"""
+			Intenar eliminar un usuario, pero
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+		user_id = 1
+		
+		response = client.delete(f"{self.url}/{user_id}", headers = self.headers)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseTokenNoValido
+
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_email_user(self, mockToken):
@@ -255,7 +288,7 @@ class TestRouterUser:
 		assert resultJson['id'] == user_id
 		assert resultJson['email'] == infoUdate.email
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_email_does_not_exists_user(self, mockToken):
@@ -283,7 +316,7 @@ class TestRouterUser:
 		assert resultStatus == 404
 		assert resultJson == {"message": DoesNotExistsUser.get(id = user_id)}
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_email_with_existing_email(self, mockToken):
@@ -318,7 +351,7 @@ class TestRouterUser:
 		assert resultJson == {"message": EmailAlreadyExists.get(email = infoUdate.email)}
 
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_email_unchanged(self, mockToken):
@@ -351,8 +384,6 @@ class TestRouterUser:
 		assert resultJson == {"message": EmailUnchanged.get()}
 
 
-
-	@patch("apps.users.commands.commands.User", User)
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_email_with_invalid_credentials(self, mockToken):
@@ -383,7 +414,59 @@ class TestRouterUser:
 		assert resultJson == {"message": InvalidCredentials.get()}
 
 
-	@patch("apps.users.commands.commands.User", User)
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_update_email_user_without_authorization(self):
+		"""
+			Actualizando email pero, sin enviar
+			un token de autenticación
+		"""
+		user_id = 1
+
+		infoUdate = schemas.UserEmail(
+			email = "bolivar19@gmail.com",
+			password = "12345"
+		)
+
+		response = client.put(
+			f"{self.url}/{user_id}/email", 
+			headers = self.headers,
+			json=infoUdate.model_dump()
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseNoToken
+
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_update_email_user_with_token_expired(self):
+		"""
+			Actualizando email pero, enviando un token
+			expirado
+		"""
+		self.headers.update(TokenExpirado)
+		user_id = 1
+
+		infoUdate = schemas.UserEmail(
+			email = "bolivar19@gmail.com",
+			password = "12345"
+		)
+
+		response = client.put(
+			f"{self.url}/{user_id}/email", 
+			headers = self.headers,
+			json=infoUdate.model_dump()
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseTokenNoValido
+
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_password_user(self, mockToken):
@@ -391,13 +474,13 @@ class TestRouterUser:
 
 		mockToken.result_value.state.result_value = True
 		self.headers.update(self.auth)
+		user_id = 1
+		user = self.db.get(User, user_id)
 
 		infoUdate = schemas.UserPassword(
 			password = "abcdef",
 			password_repeat = "abcdef",
 		)
-
-		user_id = 1
 
 		response = client.put(
 			f"{self.url}/{user_id}/password", 
@@ -409,10 +492,10 @@ class TestRouterUser:
 		resultJson = response.json()
 
 		assert resultStatus == 200
-		assert resultJson['id'] == 1
-		assert resultJson['email'] == EMAIL
+		assert resultJson['id'] == user_id
+		assert resultJson['email'] == user.email
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_password_does_not_exists_user(self, mockToken):
@@ -442,7 +525,62 @@ class TestRouterUser:
 		assert resultStatus == 404
 		assert resultJson == {"message": DoesNotExistsUser.get(id = user_id)}
 
-	@patch("apps.users.commands.commands.User", User)
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_update_password_user_without_authorization(self):
+		"""
+			Actualizar 'password' de un usuario, pero
+			sin enviar un token de autorización
+		"""
+
+		infoUdate = schemas.UserPassword(
+			password = "abcdef",
+			password_repeat = "abcdef",
+		)
+
+		user_id = 1
+
+		response = client.put(
+			f"{self.url}/{user_id}/password", 
+			headers = self.headers,
+			json=infoUdate.model_dump()
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseNoToken
+
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_update_password_user_with_expired_token(self):
+		"""
+			Actualizar 'password' de un usuario, pero
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+
+		infoUdate = schemas.UserPassword(
+			password = "abcdef",
+			password_repeat = "abcdef",
+		)
+
+		user_id = 1
+
+		response = client.put(
+			f"{self.url}/{user_id}/password", 
+			headers = self.headers,
+			json=infoUdate.model_dump()
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseTokenNoValido
+
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_username_user(self, mockToken):
@@ -472,7 +610,6 @@ class TestRouterUser:
 		assert resultJson["username"] == infoUdate.username
 
 	
-	@patch("apps.users.commands.commands.User", User)
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_username_does_not_exists_user(self, mockToken):
@@ -505,7 +642,6 @@ class TestRouterUser:
 		assert resultJson == {"message": DoesNotExistsUser.get(id = user_id)}
 
 
-	@patch("apps.users.commands.commands.User", User)
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_username_with_existing_username(self, mockToken):
@@ -538,7 +674,7 @@ class TestRouterUser:
 		assert resultStatus == 409
 		assert resultJson == {"message": UsernameAlreadyExists.get(username = infoUdate.username)}
 
-	@patch("apps.users.commands.commands.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_username_unchanged(self, mockToken):
@@ -572,7 +708,6 @@ class TestRouterUser:
 		assert resultJson == {"message": UsernamelUnchanged.get()}
 
 
-	@patch("apps.users.commands.commands.User", User)
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.utils.token.token.verify_token")
 	def test_update_username_with_invalid_credentials(self, mockToken):
@@ -604,8 +739,61 @@ class TestRouterUser:
 		assert resultStatus == 401
 		assert resultJson == {"message": InvalidCredentials.get()}
 
-	@patch("apps.users.commands.commands.User", User)
-	@patch("apps.users.commands.utils.utils.User", User)
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_update_username_user_without_authorization(self):
+		"""
+			Intentar actualizar el 'username' pero,
+			sin enviar un token de autorización
+		"""
+		infoUdate = schemas.UserPassword(
+			password = "abcdef",
+			password_repeat = "abcdef",
+		)
+
+		user_id = 1
+
+		response = client.put(
+			f"{self.url}/{user_id}/password", 
+			headers = self.headers,
+			json=infoUdate.model_dump()
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseNoToken
+
+
+	@patch("apps.users.commands.commands.get_db", get_db)
+	def test_update_username_user_with_token_expired(self):
+		"""
+			Intentar actualizar el 'username' pero,
+			enviando un token expirado
+		"""
+		self.headers.update(TokenExpirado)
+
+		infoUdate = schemas.UserPassword(
+			password = "abcdef",
+			password_repeat = "abcdef",
+		)
+
+		user_id = 1
+
+		response = client.put(
+			f"{self.url}/{user_id}/password", 
+			headers = self.headers,
+			json=infoUdate.model_dump()
+		)
+
+		resultStatus = response.status_code
+		resultJson = response.json()
+
+		assert resultStatus == 401
+		assert resultJson == ResponseTokenNoValido
+
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	def test_login_user(self):
 		""" Valiadar el acceso del usuario """
@@ -635,8 +823,7 @@ class TestRouterUser:
 		assert "token" in resultJson["auth"]
 		assert "refresh" in resultJson["auth"]
 
-	@patch("apps.users.commands.commands.User", User)
-	@patch("apps.users.commands.utils.utils.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	def test_login_with_an_invalid_email(self):
 		""" 
@@ -662,8 +849,7 @@ class TestRouterUser:
 		assert resultStatus == 401
 		assert resultJson == {"message": InvalidCredentialsNoEmail.get(email = auth.email)}
 
-	@patch("apps.users.commands.commands.User", User)
-	@patch("apps.users.commands.utils.utils.User", User)
+
 	@patch("apps.users.commands.commands.get_db", get_db)
 	def test_login_with_invalid_credentials(self):
 		""" 
