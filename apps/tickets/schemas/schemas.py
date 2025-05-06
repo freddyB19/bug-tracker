@@ -15,6 +15,7 @@ from apps.projects.schemas.schemas import ProjectSimpleResponse
 from apps.tickets.models import ChoicesType
 from apps.tickets.models import ChoicesState
 from apps.tickets.models import ChoicesPrority
+from apps.tickets.models import StateTicketHistory
 from apps.utils.pagination import pagination as pg
 
 MIN_LENGTH_TITLE = 5
@@ -98,6 +99,10 @@ StateStrField = Annotated[int, PlainSerializer(
 PriorityStrField = Annotated[int, PlainSerializer(
 	lambda value: ChoicesPrority(value).name, return_type = str
 )]
+HistoryTicketStateStrField = Annotated[int, PlainSerializer(
+	lambda value: StateTicketHistory(value).name, return_type = str
+)]
+
 
 class TicketSchema(BaseModel):
 	title: str
@@ -186,6 +191,7 @@ class TicketsHistorySchema(BaseModel):
 
 class TicketsHistorySimpleResponse(TicketsHistorySchema):
 	ticket_id: int
+	state: HistoryTicketStateStrField
 
 
 class TicketsHistoryResponse(TicketsHistorySchema):
@@ -197,5 +203,5 @@ class ListTicketsHistory(BaseModel):
 	histories: Optional[List[TicketsHistorySimpleResponse]]
 
 class TicketsHistoryByTicketResponse(pg.ResponsePagination):
-	ticket: TicketBasicResponse
+	ticket: TicketSimpleResponse
 	content: ListTicketsHistory
