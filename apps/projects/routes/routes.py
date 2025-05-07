@@ -103,10 +103,8 @@ def delete_project(id: int, token: str = Depends(validate_authorization)) -> JSO
 		)
 
 
-#TODO:
-# Cambiar la ruta url de este endpoint
 @router.get(
-	"/list/user",
+	"/list",
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.ProjectsByUser
 )
