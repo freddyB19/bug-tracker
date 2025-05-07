@@ -1128,7 +1128,7 @@ class TestRoutesProject:
 		"""
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1229,7 +1229,7 @@ class TestRoutesProject:
 		priority = "baja"
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1260,7 +1260,7 @@ class TestRoutesProject:
 		priority = "alta"
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1291,7 +1291,7 @@ class TestRoutesProject:
 		priority = "normal"
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1322,7 +1322,7 @@ class TestRoutesProject:
 		priority = "inmediata"
 		
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1367,7 +1367,7 @@ class TestRoutesProject:
 		priority = "ahora"
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1404,7 +1404,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1444,7 +1444,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"user_id": user_id
@@ -1484,7 +1484,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1516,7 +1516,7 @@ class TestRoutesProject:
 		user_id = 100
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1558,7 +1558,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"user_id": user_id
@@ -1601,7 +1601,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list/user",
+			f"{self.url}/list",
 			headers = self.headers,
 			params = {
 				"user_id": user_id
