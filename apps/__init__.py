@@ -8,8 +8,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 load_dotenv()
 
-DB_URL = "sqlite:///./bug_tracker.db"
-
+DB_URL = os.getenv('DB_URL')
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM_JWT = os.getenv('ALGORITHM_JWT')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
