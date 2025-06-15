@@ -107,9 +107,15 @@ class ListProjects(BaseModel):
 	projects: Optional[List[ProjectSimpleResponse]]
 
 
-class ProjectsByUser(pg.ResponsePagination):
+class ResponseContentPagination(BaseModel):
 	user: UserResponse
 	content: ListProjects
+
+
+class ProjectsByUser(BaseModel):
+	response: ResponseContentPagination
+	pagination: pg.ResponsePagination
+
 
 class ProjectsPagination(pg.ListPagination):
 	user_id: int
