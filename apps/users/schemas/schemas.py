@@ -18,7 +18,7 @@ def len_string_field(value:str, handler, info: ValidationInfo):
 	if len(value) >= 4 and len(value) <= 20:
 		return value
 
-	message_error = f"La logitud debe ser entre 4 y 20 caracteres"
+	message_error = f"La longitud debe ser entre 4 y 20 caracteres"
 	message_error += f" en ({info.field_name})"
 
 	raise ValueError(message_error)
@@ -120,5 +120,6 @@ class TokenRefresh(BaseModel):
 class TokensResponse(BaseModel):
 	auth: AuthUserSchema
 
-class UserLoginResponse(UserResponse):
+class UserLoginResponse(BaseModel):
+	user: UserResponse
 	auth: AuthUserSchema
