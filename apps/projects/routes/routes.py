@@ -104,14 +104,13 @@ def delete_project(id: int, token: str = Depends(validate_authorization)) -> JSO
 
 
 @router.get(
-	"/list",
+	"/list/user",
 	status_code = status.HTTP_200_OK,
 	response_model = schemas.ProjectsByUser
 )
-def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagination, Query()],token: str = Depends(validate_authorization)) -> schemas.ProjectsByUser:
+def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagination, Query()], token: str = Depends(validate_authorization)) -> schemas.ProjectsByUser:
 
-	try:
-		
+	try:		
 		user = c_users.command_get_user(
 			user_id = query.user_id
 		)
@@ -149,13 +148,17 @@ def get_project_by_user(request: Request, query: Annotated[schemas.ProjectsPagin
 	)
 
 	response = {
-		"previous": pagination.get('previous'),
-		"current": query.page,
-		"next": pagination.get('next'),
-		"user": user,
-		"content": {
-			"total": total,
-			"projects": projects
+		"pagination": {
+			"previous": pagination.get('previous'),
+			"current": query.page,
+			"next": pagination.get('next'),
+		},
+		"response": {
+			"user": user,
+			"content": {
+				"total": total,
+				"projects": projects
+			}
 		}
 	}
 
