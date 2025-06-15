@@ -765,7 +765,7 @@ class TestRouterUser:
 		resultJson = response.json()
 
 		assert resultStatus == 422
-		assert resultJson["message"] == "La logitud debe ser entre 4 y 20 caracteres en (username)"
+		assert resultJson["message"] == "La longitud debe ser entre 4 y 20 caracteres en (username)"
 
 
 	@patch("apps.users.commands.commands.get_db", get_db)
@@ -843,10 +843,10 @@ class TestRouterUser:
 		resultJson = response.json()
 
 		assert resultStatus == 200
-		assert resultJson["id"] == 1
-		assert resultJson["name"] == data.name 
-		assert resultJson["username"] == data.username 
-		assert resultJson["email"] == data.email
+		assert resultJson["user"]["id"] == 1
+		assert resultJson["user"]["name"] == data.name 
+		assert resultJson["user"]["username"] == data.username 
+		assert resultJson["user"]["email"] == data.email
 		assert "auth" in resultJson.keys()
 		assert "token" in resultJson["auth"]
 		assert "refresh" in resultJson["auth"]
