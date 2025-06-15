@@ -188,14 +188,12 @@ def command_login(infoLogin: schemas.UserLogin) -> Dict[str, str | int]:
 	token = TokenCreate.main(data = user)
 	refresh_token = TokenRefresh.main(data = user)
 
-	user.update({
-		'auth': {
-			"token": token,
-			"refresh": refresh_token
-		}
-	})
+	auth = {
+		"token": token,
+		"refresh": refresh_token
+	}
 
-	return user
+	return {"user": user, "auth": auth}
 
 
 @validate_call
