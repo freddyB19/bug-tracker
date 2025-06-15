@@ -446,11 +446,11 @@ class TestCommandsUser:
 		assert type(user) == dict
 
 		# Validación del usuario
-		assert user['id'] == self.user.id
-		assert user['name'] == self.user.name
-		assert user['email'] == self.user.email
-		assert user['username'] == self.user.username
-		assert user['password'] == self.user.password.decode("utf-8")
+		assert user["user"]['id'] == self.user.id
+		assert user["user"]['name'] == self.user.name
+		assert user["user"]['email'] == self.user.email
+		assert user["user"]['username'] == self.user.username
+		assert user["user"]['password'] == self.user.password.decode("utf-8")
 
 		#Validación de credenciales de acceso
 		assert "auth" in user.keys()
