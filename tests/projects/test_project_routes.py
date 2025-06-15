@@ -1128,7 +1128,7 @@ class TestRoutesProject:
 		"""
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1139,25 +1139,26 @@ class TestRoutesProject:
 
 		responseStatus = response.status_code
 		responseJson = response.json()
-		
+
 		assert responseStatus == 200
-		assert "previous" in responseJson.keys()
-		assert "current"  in responseJson.keys()
-		assert "next" in responseJson.keys()
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is not None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == user.id
-		assert responseJson["user"]["name"] == user.name
-		assert "total" in responseJson["content"].keys()
-		assert "projects" in responseJson["content"].keys()
-		assert responseJson["content"]["total"] == 3
-		assert len(responseJson["content"]["projects"]) == 2
+
+		assert "previous" in responseJson["pagination"].keys()
+		assert "current"  in responseJson["pagination"].keys()
+		assert "next" in responseJson["pagination"].keys()
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is not None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == user.id
+		assert responseJson["response"]["user"]["name"] == user.name
+		assert "total" in responseJson["response"]["content"].keys()
+		assert "projects" in responseJson["response"]["content"].keys()
+		assert responseJson["response"]["content"]["total"] == 3
+		assert len(responseJson["response"]["content"]["projects"]) == 2
 
 		page = 2
 		
 		response = client.get(
-			f"{responseJson['next']}",
+			f"{responseJson['pagination']['next']}",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1170,15 +1171,15 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is not None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == 1
-		assert responseJson["user"]["name"] == "bolivar"
-		assert "total" in responseJson["content"].keys()
-		assert "projects" in responseJson["content"].keys()
-		assert responseJson["content"]["total"] == 3
-		assert len(responseJson["content"]["projects"]) == 1
+		assert responseJson["pagination"]["previous"] is not None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == 1
+		assert responseJson["response"]["user"]["name"] == "bolivar"
+		assert "total" in responseJson["response"]["content"].keys()
+		assert "projects" in responseJson["response"]["content"].keys()
+		assert responseJson["response"]["content"]["total"] == 3
+		assert len(responseJson["response"]["content"]["projects"]) == 1
 
 	@patch("apps.users.commands.commands.get_db", get_db)
 	@patch("apps.projects.commands.commands.get_db", get_db)
@@ -1229,7 +1230,7 @@ class TestRoutesProject:
 		priority = "baja"
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1243,16 +1244,16 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == 1
-		assert responseJson["user"]["name"] == "bolivar"
-		assert "total" in responseJson["content"].keys()
-		assert "projects" in responseJson["content"].keys()
-		assert responseJson["content"]["total"] == 2
-		assert responseJson["content"]["projects"]
-		assert len(responseJson["content"]["projects"]) == 2
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == 1
+		assert responseJson["response"]["user"]["name"] == "bolivar"
+		assert "total" in responseJson["response"]["content"].keys()
+		assert "projects" in responseJson["response"]["content"].keys()
+		assert responseJson["response"]["content"]["total"] == 2
+		assert responseJson["response"]["content"]["projects"]
+		assert len(responseJson["response"]["content"]["projects"]) == 2
 
 		
 		# Filter: priority = "alta"
@@ -1260,7 +1261,7 @@ class TestRoutesProject:
 		priority = "alta"
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1274,16 +1275,16 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == 1
-		assert responseJson["user"]["name"] == "bolivar"
-		assert "total" in responseJson["content"].keys()
-		assert "projects" in responseJson["content"].keys()
-		assert responseJson["content"]["total"] == 1
-		assert responseJson["content"]["projects"]
-		assert len(responseJson["content"]["projects"]) == 1
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == 1
+		assert responseJson["response"]["user"]["name"] == "bolivar"
+		assert "total" in responseJson["response"]["content"].keys()
+		assert "projects" in responseJson["response"]["content"].keys()
+		assert responseJson["response"]["content"]["total"] == 1
+		assert responseJson["response"]["content"]["projects"]
+		assert len(responseJson["response"]["content"]["projects"]) == 1
 
 		
 		# Filter: priority = "normal"
@@ -1291,7 +1292,7 @@ class TestRoutesProject:
 		priority = "normal"
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1305,16 +1306,16 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == 1
-		assert responseJson["user"]["name"] == "bolivar"
-		assert "total" in responseJson["content"].keys()
-		assert "projects" in responseJson["content"].keys()
-		assert responseJson["content"]["total"] == 1
-		assert responseJson["content"]["projects"]
-		assert len(responseJson["content"]["projects"]) == 1
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == 1
+		assert responseJson["response"]["user"]["name"] == "bolivar"
+		assert "total" in responseJson["response"]["content"].keys()
+		assert "projects" in responseJson["response"]["content"].keys()
+		assert responseJson["response"]["content"]["total"] == 1
+		assert responseJson["response"]["content"]["projects"]
+		assert len(responseJson["response"]["content"]["projects"]) == 1
 
 		
 		# Filter: priority = "inmediata"
@@ -1322,7 +1323,7 @@ class TestRoutesProject:
 		priority = "inmediata"
 		
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1336,16 +1337,16 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == 1
-		assert responseJson["user"]["name"] == "bolivar"
-		assert "total" in responseJson["content"].keys()
-		assert "projects" in responseJson["content"].keys()
-		assert responseJson["content"]["total"] == 0
-		assert not responseJson["content"]["projects"]
-		assert len(responseJson["content"]["projects"]) == 0
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == 1
+		assert responseJson["response"]["user"]["name"] == "bolivar"
+		assert "total" in responseJson["response"]["content"].keys()
+		assert "projects" in responseJson["response"]["content"].keys()
+		assert responseJson["response"]["content"]["total"] == 0
+		assert not responseJson["response"]["content"]["projects"]
+		assert len(responseJson["response"]["content"]["projects"]) == 0
 
 
 	@patch("apps.users.commands.commands.get_db", get_db)
@@ -1367,7 +1368,7 @@ class TestRoutesProject:
 		priority = "ahora"
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1404,7 +1405,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1417,13 +1418,13 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == page
-		assert responseJson["user"]["id"] == user.id
-		assert responseJson["user"]["name"] == user.name
-		assert responseJson["content"]["total"] == 1
-		assert len(responseJson["content"]["projects"]) == 0
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == page
+		assert responseJson["response"]["user"]["id"] == user.id
+		assert responseJson["response"]["user"]["name"] == user.name
+		assert responseJson["response"]["content"]["total"] == 1
+		assert len(responseJson["response"]["content"]["projects"]) == 0
 
 
 	@patch("apps.users.commands.commands.get_db", get_db)
@@ -1444,7 +1445,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"user_id": user_id
@@ -1455,13 +1456,13 @@ class TestRoutesProject:
 		responseJson = response.json()
 
 		assert responseStatus == 200
-		assert responseJson["previous"] is None
-		assert responseJson["next"] is None
-		assert responseJson["current"] == 1
-		assert responseJson["user"]["id"] == user.id
-		assert responseJson["user"]["name"] == user.name
-		assert responseJson["content"]["total"] == 1
-		assert len(responseJson["content"]["projects"]) == 1
+		assert responseJson["pagination"]["previous"] is None
+		assert responseJson["pagination"]["next"] is None
+		assert responseJson["pagination"]["current"] == 1
+		assert responseJson["response"]["user"]["id"] == user.id
+		assert responseJson["response"]["user"]["name"] == user.name
+		assert responseJson["response"]["content"]["total"] == 1
+		assert len(responseJson["response"]["content"]["projects"]) == 1
 
 
 	@patch("apps.users.commands.commands.get_db", get_db)
@@ -1484,7 +1485,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1516,7 +1517,7 @@ class TestRoutesProject:
 		user_id = 100
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"page": page,
@@ -1558,7 +1559,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"user_id": user_id
@@ -1601,7 +1602,7 @@ class TestRoutesProject:
 		user = self.db.get(User, user_id)
 
 		response = client.get(
-			f"{self.url}/list",
+			f"{self.url}/list/user",
 			headers = self.headers,
 			params = {
 				"user_id": user_id
